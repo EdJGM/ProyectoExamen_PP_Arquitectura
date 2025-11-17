@@ -1,0 +1,1 @@
+<%@ ServiceHost Language="C#" Debug="true" Service="BanQuito_Soap_Dotnet.ec.edu.monster.ws.BanQuitoWS" CodeBehind="BanQuitoWS.svc.cs" %>
