@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE payara-web-app PUBLIC "-//Payara.fish//DTD Payara Server 6 Servlet 6.0//EN"
+    "https://raw.githubusercontent.com/payara/Payara/master/appserver/deployment/dtds/payara-web-app_6_0-0.dtd">
+
+<payara-web-app>
+    <context-root>/BanquitoCore</context-root>
+
+    <!-- Configuración de seguridad -->
+    <security-role-mapping>
+        <role-name>admin</role-name>
+        <principal-name>admin</principal-name>
+    </security-role-mapping>
+
+    <!-- Configuración de recursos -->
+    <resource-ref>
+        <res-ref-name>jdbc/BanquitoDB</res-ref-name>
+        <jndi-name>jdbc/BanquitoDB</jndi-name>
+    </resource-ref>
+
+    <!-- Configuración de classloading -->
+    <class-loader delegate="false"/>
+
+    <!-- Configuración de sesión -->
+    <session-config>
+        <session-timeout>30</session-timeout>
+    </session-config>
+</payara-web-app>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE payara-web-app PUBLIC "-//Payara.fish//DTD Payara Server 4 Servlet 3.0//EN" "https://raw.githubusercontent.com/payara/Payara/master/appserver/payara-appserver-modules/deployment/dtds/payara-web-app_4_0-1.dtd">
+<payara-web-app error-url="">
+    <context-root>/ComercializadoraElectrodomesticos</context-root>
+
+    <!-- Enable Jakarta EE 10 features -->
+    <parameter-encoding default-charset="UTF-8"/>
+
+    <!-- Session configuration for Payara -->
+    <session-manager>
+        <manager-properties>
+            <property name="sessionFilename" value="SESSIONS.ser"/>
+        </manager-properties>
+    </session-manager>
+
+    <!-- Resource references (if needed) -->
+    <!--
+    <resource-ref>
+        <res-ref-name>jdbc/ComercializadoraDB</res-ref-name>
+        <jndi-name>jdbc/ComercializadoraDB</jndi-name>
+    </resource-ref>
+    -->
+
+</payara-web-app>
+

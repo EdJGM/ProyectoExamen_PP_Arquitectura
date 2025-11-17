@@ -1,0 +1,33 @@
+# Configuración del DataSource para Payara
+# Este archivo debe ser usado como referencia para configurar el datasource en Payara Admin Console
+
+# Configuración JDBC Connection Pool
+Pool Name: BanquitoPool
+Resource Type: javax.sql.DataSource
+Database Driver Vendor: MySQL
+Driver Classname: com.mysql.cj.jdbc.Driver
+URL: jdbc:mysql://localhost:3306/banquito_core?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+User: root
+Password: root
+
+# Additional Properties:
+useSSL=false
+serverTimezone=UTC
+allowPublicKeyRetrieval=true
+autoReconnect=true
+useUnicode=true
+characterEncoding=UTF-8
+
+# Configuración JDBC Resource
+JNDI Name: jdbc/BanquitoDB
+Pool Name: BanquitoPool
+
+# Comandos asadmin para configurar desde línea de comandos:
+# 1. Crear Connection Pool:
+# asadmin create-jdbc-connection-pool --datasourceclassname com.mysql.cj.jdbc.DataSource --restype javax.sql.DataSource --property user=root:password=root:url="jdbc\:mysql\://localhost\:3306/banquito_core?useSSL\=false&serverTimezone\=UTC&allowPublicKeyRetrieval\=true" BanquitoPool
+
+# 2. Crear JDBC Resource:
+# asadmin create-jdbc-resource --connectionpoolid BanquitoPool jdbc/BanquitoDB
+
+# 3. Verificar conexión:
+# asadmin ping-connection-pool BanquitoPool
