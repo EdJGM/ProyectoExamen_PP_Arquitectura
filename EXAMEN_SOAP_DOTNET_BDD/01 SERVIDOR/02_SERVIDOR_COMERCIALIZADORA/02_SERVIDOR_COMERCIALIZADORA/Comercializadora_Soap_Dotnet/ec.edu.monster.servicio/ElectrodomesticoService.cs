@@ -17,7 +17,7 @@ namespace Comercializadora_Soap_Dotnet.ec.edu.monster.servicio
             using (SqlConnection cn = new SqlConnection(connectionString))
             {
                 cn.Open();
-                string sql = "SELECT * FROM Electrodomesticos WHERE Estado = 'ACTIVO'";
+                string sql = "SELECT * FROM electrodomestico WHERE estado = 'DISPONIBLE'";
                 SqlCommand cmd = new SqlCommand(sql, cn);
                 SqlDataReader dr = cmd.ExecuteReader();
 
@@ -25,12 +25,15 @@ namespace Comercializadora_Soap_Dotnet.ec.edu.monster.servicio
                 {
                     lista.Add(new Electrodomestico
                     {
-                        IdElectrodomestico = Convert.ToInt32(dr["IdElectrodomestico"]),
-                        Nombre = dr["Nombre"].ToString(),
-                        Descripcion = dr["Descripcion"].ToString(),
-                        Precio = Convert.ToDecimal(dr["Precio"]),
-                        Estado = dr["Estado"].ToString(),
-                        FechaRegistro = Convert.ToDateTime(dr["FechaRegistro"])
+                        IdElectrodomestico = Convert.ToInt32(dr["id_electrodomestico"]),
+                        Codigo = dr["codigo"].ToString(),
+                        Nombre = dr["nombre"].ToString(),
+                        Descripcion = dr["descripcion"].ToString(),
+                        Marca = dr["marca"].ToString(),
+                        PrecioVenta = Convert.ToDecimal(dr["precio_venta"]),
+                        Stock = Convert.ToInt32(dr["stock"]),
+                        Estado = dr["estado"].ToString(),
+                        FechaRegistro = Convert.ToDateTime(dr["fecha_registro"])
                     });
                 }
             }
@@ -42,7 +45,7 @@ namespace Comercializadora_Soap_Dotnet.ec.edu.monster.servicio
             using (SqlConnection cn = new SqlConnection(connectionString))
             {
                 cn.Open();
-                string sql = "SELECT * FROM Electrodomesticos WHERE IdElectrodomestico = @id";
+                string sql = "SELECT * FROM electrodomestico WHERE id_electrodomestico = @id";
                 SqlCommand cmd = new SqlCommand(sql, cn);
                 cmd.Parameters.AddWithValue("@id", id);
                 SqlDataReader dr = cmd.ExecuteReader();
@@ -51,47 +54,56 @@ namespace Comercializadora_Soap_Dotnet.ec.edu.monster.servicio
                 {
                     return new Electrodomestico
                     {
-                        IdElectrodomestico = Convert.ToInt32(dr["IdElectrodomestico"]),
-                        Nombre = dr["Nombre"].ToString(),
-                        Descripcion = dr["Descripcion"].ToString(),
-                        Precio = Convert.ToDecimal(dr["Precio"]),
-                        Estado = dr["Estado"].ToString(),
-                        FechaRegistro = Convert.ToDateTime(dr["FechaRegistro"])
+                        IdElectrodomestico = Convert.ToInt32(dr["id_electrodomestico"]),
+                        Codigo = dr["codigo"].ToString(),
+                        Nombre = dr["nombre"].ToString(),
+                        Descripcion = dr["descripcion"].ToString(),
+                        Marca = dr["marca"].ToString(),
+                        PrecioVenta = Convert.ToDecimal(dr["precio_venta"]),
+                        Stock = Convert.ToInt32(dr["stock"]),
+                        Estado = dr["estado"].ToString(),
+                        FechaRegistro = Convert.ToDateTime(dr["fecha_registro"])
                     };
                 }
             }
             return null;
         }
 
-        public static string Crear(string nombre, string descripcion, decimal precio)
+        public static string Crear(string codigo, string nombre, string descripcion, string marca, decimal precioVenta, int stock)
         {
             using (SqlConnection cn = new SqlConnection(connectionString))
             {
                 cn.Open();
-                string sql = @"INSERT INTO Electrodomesticos (Nombre, Descripcion, Precio, Estado, FechaRegistro)
-                             VALUES (@nombre, @descripcion, @precio, 'ACTIVO', GETDATE())";
+                string sql = @"INSERT INTO electrodomestico 
+                    (codigo, nombre, descripcion, marca, precio_venta, stock, estado, fecha_registro)
+                    VALUES (@codigo, @nombre, @descripcion, @marca, @precio_venta, @stock, 'DISPONIBLE', GETDATE())";
                 SqlCommand cmd = new SqlCommand(sql, cn);
+                cmd.Parameters.AddWithValue("@codigo", codigo);
                 cmd.Parameters.AddWithValue("@nombre", nombre);
                 cmd.Parameters.AddWithValue("@descripcion", descripcion);
-                cmd.Parameters.AddWithValue("@precio", precio);
+                cmd.Parameters.AddWithValue("@marca", marca);
+                cmd.Parameters.AddWithValue("@precio_venta", precioVenta);
+                cmd.Parameters.AddWithValue("@stock", stock);
                 cmd.ExecuteNonQuery();
                 return "Electrodoméstico creado exitosamente";
             }
         }
 
-        public static string Actualizar(int id, string nombre, string descripcion, decimal precio)
+        public static string Actualizar(int id, string nombre, string descripcion, string marca, decimal precioVenta, int stock)
         {
             using (SqlConnection cn = new SqlConnection(connectionString))
             {
                 cn.Open();
-                string sql = @"UPDATE Electrodomesticos 
-                             SET Nombre = @nombre, Descripcion = @descripcion, Precio = @precio
-                             WHERE IdElectrodomestico = @id";
+                string sql = @"UPDATE electrodomestico 
+                    SET nombre = @nombre, descripcion = @descripcion, marca = @marca, precio_venta = @precio_venta, stock = @stock
+                    WHERE id_electrodomestico = @id";
                 SqlCommand cmd = new SqlCommand(sql, cn);
                 cmd.Parameters.AddWithValue("@id", id);
                 cmd.Parameters.AddWithValue("@nombre", nombre);
                 cmd.Parameters.AddWithValue("@descripcion", descripcion);
-                cmd.Parameters.AddWithValue("@precio", precio);
+                cmd.Parameters.AddWithValue("@marca", marca);
+                cmd.Parameters.AddWithValue("@precio_venta", precioVenta);
+                cmd.Parameters.AddWithValue("@stock", stock);
                 cmd.ExecuteNonQuery();
                 return "Electrodoméstico actualizado exitosamente";
             }
@@ -102,7 +114,7 @@ namespace Comercializadora_Soap_Dotnet.ec.edu.monster.servicio
             using (SqlConnection cn = new SqlConnection(connectionString))
             {
                 cn.Open();
-                string sql = "UPDATE Electrodomesticos SET Estado = 'INACTIVO' WHERE IdElectrodomestico = @id";
+                string sql = "UPDATE electrodomestico SET estado = 'INACTIVO' WHERE id_electrodomestico = @id";
                 SqlCommand cmd = new SqlCommand(sql, cn);
                 cmd.Parameters.AddWithValue("@id", id);
                 cmd.ExecuteNonQuery();

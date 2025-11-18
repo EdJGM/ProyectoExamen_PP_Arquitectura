@@ -33,14 +33,14 @@ namespace BanQuito_Soap_Dotnet.ec.edu.monster.modelo
         [DataMember(Order = 9)]
         public string Email { get; set; }
 
-        [DataMember(Order = 10)]
-        public string Estado { get; set; }
+        [DataMember(Order = 10)] 
+        public DateTime FechaRegistro { get; set; }
 
         public Cliente() { }
 
         public Cliente(int idCliente, string cedula, string nombres, string apellidos, 
                       DateTime fechaNacimiento, string estadoCivil, string direccion, 
-                      string telefono, string email, string estado)
+                      string telefono, string email, DateTime fechaRegistro)
         {
             IdCliente = idCliente;
             Cedula = cedula;
@@ -51,7 +51,8 @@ namespace BanQuito_Soap_Dotnet.ec.edu.monster.modelo
             Direccion = direccion;
             Telefono = telefono;
             Email = email;
-            Estado = estado;
+            FechaRegistro = fechaRegistro;
+
         }
     }
 }

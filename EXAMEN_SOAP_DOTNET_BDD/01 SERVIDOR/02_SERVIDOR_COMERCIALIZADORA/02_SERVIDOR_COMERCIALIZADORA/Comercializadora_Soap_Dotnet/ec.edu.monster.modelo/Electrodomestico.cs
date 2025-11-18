@@ -10,18 +10,27 @@ namespace Comercializadora_Soap_Dotnet.ec.edu.monster.modelo
         public int IdElectrodomestico { get; set; }
 
         [DataMember(Order = 2)]
-        public string Nombre { get; set; }
+        public string Codigo { get; set; }
 
         [DataMember(Order = 3)]
-        public string Descripcion { get; set; }
+        public string Nombre { get; set; }
 
         [DataMember(Order = 4)]
-        public decimal Precio { get; set; }
+        public string Descripcion { get; set; }
 
         [DataMember(Order = 5)]
-        public string Estado { get; set; }
+        public string Marca { get; set; }
 
         [DataMember(Order = 6)]
+        public decimal PrecioVenta { get; set; }
+
+        [DataMember(Order = 7)]
+        public int Stock { get; set; }
+
+        [DataMember(Order = 8)]
+        public string Estado { get; set; }
+
+        [DataMember(Order = 9)]
         public DateTime FechaRegistro { get; set; }
 
         public Electrodomestico() { }

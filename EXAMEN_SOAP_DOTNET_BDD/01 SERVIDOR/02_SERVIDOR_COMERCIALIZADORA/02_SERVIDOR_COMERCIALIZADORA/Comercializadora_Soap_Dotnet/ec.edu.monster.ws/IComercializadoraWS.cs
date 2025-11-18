@@ -16,10 +16,10 @@ namespace Comercializadora_Soap_Dotnet.ec.edu.monster.ws
         Electrodomestico ObtenerElectrodomestico(int id);
 
         [OperationContract]
-        string CrearElectrodomestico(string nombre, string descripcion, double precio);
+        string CrearElectrodomestico(string codigo, string nombre, string descripcion, string marca, double precioVenta, int stock);
 
         [OperationContract]
-        string ActualizarElectrodomestico(int id, string nombre, string descripcion, double precio);
+        string ActualizarElectrodomestico(int id, string nombre, string descripcion, string marca, double precioVenta, int stock);
 
         [OperationContract]
         string EliminarElectrodomestico(int id);
@@ -28,14 +28,14 @@ namespace Comercializadora_Soap_Dotnet.ec.edu.monster.ws
         [OperationContract]
         RespuestaVenta ProcesarVentaEfectivo(
             string cedula,
-            List<int> idsElectrodomesticos,
-            List<int> cantidades);
+            int[] idsElectrodomesticos,
+            int[] cantidades);
 
         [OperationContract]
         RespuestaVenta ProcesarVentaCredito(
             string cedula,
-            List<int> idsElectrodomesticos,
-            List<int> cantidades,
+            int[] idsElectrodomesticos,
+            int[] cantidades,
             int numeroCuotas);
 
         // ========== CONSULTAS ==========

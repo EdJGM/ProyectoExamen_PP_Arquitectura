@@ -34,7 +34,7 @@ namespace Comercializadora_Soap_Dotnet.ec.edu.monster.servicio
                         int idElectro = idsElectrodomesticos[i];
                         int cantidad = cantidades[i];
 
-                        string sqlPrecio = "SELECT Precio FROM Electrodomesticos WHERE IdElectrodomestico = @id";
+                        string sqlPrecio = "SELECT precio_venta FROM electrodomestico WHERE id_electrodomestico = @id";
                         SqlCommand cmdPrecio = new SqlCommand(sqlPrecio, cn, tx);
                         cmdPrecio.Parameters.AddWithValue("@id", idElectro);
                         decimal precio = Convert.ToDecimal(cmdPrecio.ExecuteScalar());
@@ -48,8 +48,8 @@ namespace Comercializadora_Soap_Dotnet.ec.edu.monster.servicio
 
                     // Insertar factura
                     string sqlFactura = @"
-                        INSERT INTO Facturas (Cedula, FormaPago, FechaVenta, Descuento, Subtotal, Total, Estado)
-                        VALUES (@cedula, 'EFECTIVO', GETDATE(), @descuento, @subtotal, @total, 'PAGADO');
+                        INSERT INTO factura (cedula_cliente, forma_pago, fecha_factura, descuento, subtotal, total, estado)
+                        VALUES (@cedula, 'EFECTIVO', GETDATE(), @descuento, @subtotal, @total, 'PAGADA');
                         SELECT SCOPE_IDENTITY();";
 
                     SqlCommand cmdFactura = new SqlCommand(sqlFactura, cn, tx);
@@ -66,13 +66,13 @@ namespace Comercializadora_Soap_Dotnet.ec.edu.monster.servicio
                         int idElectro = idsElectrodomesticos[i];
                         int cantidad = cantidades[i];
 
-                        string sqlPrecio = "SELECT Precio FROM Electrodomesticos WHERE IdElectrodomestico = @id";
+                        string sqlPrecio = "SELECT precio_venta FROM electrodomestico WHERE id_electrodomestico = @id";
                         SqlCommand cmdPrecio = new SqlCommand(sqlPrecio, cn, tx);
                         cmdPrecio.Parameters.AddWithValue("@id", idElectro);
                         decimal precioUnit = Convert.ToDecimal(cmdPrecio.ExecuteScalar());
 
                         string sqlDetalle = @"
-                            INSERT INTO DetallesFactura (IdFactura, IdElectrodomestico, Cantidad, PrecioUnitario, Subtotal)
+                            INSERT INTO detalle_factura (id_factura, id_electrodomestico, cantidad, precio_unitario, subtotal)
                             VALUES (@idFactura, @idElectro, @cantidad, @precioUnit, @subtotal)";
 
                         SqlCommand cmdDetalle = new SqlCommand(sqlDetalle, cn, tx);
@@ -125,10 +125,10 @@ namespace Comercializadora_Soap_Dotnet.ec.edu.monster.servicio
                 using (SqlConnection cn = new SqlConnection(connectionString))
                 {
                     cn.Open();
-                    string sqlPrecio = "SELECT Precio FROM Electrodomesticos WHERE IdElectrodomestico = @id";
+                    string sqlPrecio = "SELECT precio_venta FROM electrodomestico WHERE id_electrodomestico = @id";
                     SqlCommand cmdPrecio = new SqlCommand(sqlPrecio, cn);
                     cmdPrecio.Parameters.AddWithValue("@id", idsElectrodomesticos[i]);
-                    
+
                     object result = cmdPrecio.ExecuteScalar();
                     if (result != null)
                     {
@@ -183,7 +183,7 @@ namespace Comercializadora_Soap_Dotnet.ec.edu.monster.servicio
                 };
             }
 
-            // PASO 5: Registrar factura LOCAL
+            // PASO 5: Registrar factura, detalles y crédito local
             using (SqlConnection cn = new SqlConnection(connectionString))
             {
                 cn.Open();
@@ -193,14 +193,13 @@ namespace Comercializadora_Soap_Dotnet.ec.edu.monster.servicio
                 {
                     // Insertar factura
                     string sqlFactura = @"
-                        INSERT INTO Facturas (Cedula, FormaPago, FechaVenta, Descuento, Subtotal, Total, IdCreditoBanco, Estado)
-                        VALUES (@cedula, 'CREDITO_DIRECTO', GETDATE(), 0, @total, @total, @idCredito, 'PAGADO');
+                        INSERT INTO factura (cedula_cliente, forma_pago, fecha_factura, descuento, subtotal, total, estado)
+                        VALUES (@cedula, 'CREDITO_DIRECTO', GETDATE(), 0, @total, @total, 'PAGADA');
                         SELECT SCOPE_IDENTITY();";
 
                     SqlCommand cmdFactura = new SqlCommand(sqlFactura, cn, tx);
                     cmdFactura.Parameters.AddWithValue("@cedula", cedula);
                     cmdFactura.Parameters.AddWithValue("@total", total);
-                    cmdFactura.Parameters.AddWithValue("@idCredito", credito.IdCredito);
 
                     int idFactura = Convert.ToInt32(cmdFactura.ExecuteScalar());
 
@@ -210,13 +209,13 @@ namespace Comercializadora_Soap_Dotnet.ec.edu.monster.servicio
                         int idElectro = idsElectrodomesticos[i];
                         int cantidad = cantidades[i];
 
-                        string sqlPrecio = "SELECT Precio FROM Electrodomesticos WHERE IdElectrodomestico = @id";
+                        string sqlPrecio = "SELECT precio_venta FROM electrodomestico WHERE id_electrodomestico = @id";
                         SqlCommand cmdPrecio = new SqlCommand(sqlPrecio, cn, tx);
                         cmdPrecio.Parameters.AddWithValue("@id", idElectro);
                         decimal precioUnit = Convert.ToDecimal(cmdPrecio.ExecuteScalar());
 
                         string sqlDetalle = @"
-                            INSERT INTO DetallesFactura (IdFactura, IdElectrodomestico, Cantidad, PrecioUnitario, Subtotal)
+                            INSERT INTO detalle_factura (id_factura, id_electrodomestico, cantidad, precio_unitario, subtotal)
                             VALUES (@idFactura, @idElectro, @cantidad, @precioUnit, @subtotal)";
 
                         SqlCommand cmdDetalle = new SqlCommand(sqlDetalle, cn, tx);
@@ -228,6 +227,19 @@ namespace Comercializadora_Soap_Dotnet.ec.edu.monster.servicio
 
                         cmdDetalle.ExecuteNonQuery();
                     }
+
+                    // Insertar crédito aprobado local
+                    string sqlCredito = @"
+                        INSERT INTO credito_aprobado (id_factura, cedula_cliente, id_credito_banco, monto_credito, numero_cuotas, cuota_mensual, estado, fecha_aprobacion)
+                        VALUES (@idFactura, @cedula, @idCreditoBanco, @montoCredito, @numeroCuotas, @cuotaMensual, 'APROBADO', GETDATE())";
+                    SqlCommand cmdCredito = new SqlCommand(sqlCredito, cn, tx);
+                    cmdCredito.Parameters.AddWithValue("@idFactura", idFactura);
+                    cmdCredito.Parameters.AddWithValue("@cedula", cedula);
+                    cmdCredito.Parameters.AddWithValue("@idCreditoBanco", credito.IdCredito);
+                    cmdCredito.Parameters.AddWithValue("@montoCredito", total);
+                    cmdCredito.Parameters.AddWithValue("@numeroCuotas", numeroCuotas);
+                    cmdCredito.Parameters.AddWithValue("@cuotaMensual", credito.CuotaMensual);
+                    cmdCredito.ExecuteNonQuery();
 
                     tx.Commit();
 

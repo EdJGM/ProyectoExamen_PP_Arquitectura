@@ -1,231 +1,271 @@
--- =============================================
--- SCRIPT SQL - BANCO BANQUITO
+-- =====================================================
+-- SCRIPT SQL - BANCO BANQUITO (NOMENCLATURA JAVA)
 -- Base de Datos: banquito_core
--- =============================================
 
-CREATE DATABASE banquito_core;
+-- =====================================================
+
+IF EXISTS (SELECT name FROM sys.databases WHERE name = 'banquito_core')
+BEGIN
+    ALTER DATABASE banquito_core SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+    DROP DATABASE banquito_core;
+END
 GO
 
-USE banquito_core;
+CREATE DATABASE banquito_core1;
+GO
+
+USE banquito_core1;
 GO
 
 -- =============================================
--- TABLAS
+-- TABLA 1: cliente
 -- =============================================
-
--- Tabla Clientes
-CREATE TABLE Clientes (
-    IdCliente INT PRIMARY KEY IDENTITY(1,1),
-    Cedula VARCHAR(10) NOT NULL UNIQUE,
-    Nombres VARCHAR(100) NOT NULL,
-    Apellidos VARCHAR(100) NOT NULL,
-    FechaNacimiento DATE NOT NULL,
-    EstadoCivil VARCHAR(20) NOT NULL,
-    Direccion VARCHAR(200),
-    Telefono VARCHAR(15),
-    Email VARCHAR(100),
-    Estado VARCHAR(20) NOT NULL DEFAULT 'ACTIVO',
-    CONSTRAINT CHK_EstadoCivil CHECK (EstadoCivil IN ('SOLTERO', 'CASADO', 'DIVORCIADO', 'VIUDO')),
-    CONSTRAINT CHK_EstadoCliente CHECK (Estado IN ('ACTIVO', 'INACTIVO'))
+CREATE TABLE cliente (
+    id_cliente INT PRIMARY KEY IDENTITY(1,1),
+    cedula VARCHAR(10) NOT NULL UNIQUE,
+    nombre VARCHAR(100) NOT NULL,
+    apellido VARCHAR(100) NOT NULL,
+    fecha_nacimiento DATE NOT NULL,
+    estado_civil VARCHAR(20) NOT NULL,
+    telefono VARCHAR(15),
+    email VARCHAR(100),
+    direccion VARCHAR(200),
+    fecha_registro DATETIME NOT NULL DEFAULT GETDATE(),
+    CONSTRAINT CHK_estado_civil CHECK (estado_civil IN ('SOLTERO', 'CASADO', 'DIVORCIADO', 'VIUDO', 'Soltero', 'Soltera', 'Casado', 'Casada'))
 );
+GO
 
--- Tabla Cuentas
-CREATE TABLE Cuentas (
-    IdCuenta INT PRIMARY KEY IDENTITY(1,1),
-    IdCliente INT NOT NULL,
-    NumeroCuenta VARCHAR(20) NOT NULL UNIQUE,
-    TipoCuenta VARCHAR(20) NOT NULL,
-    Saldo DECIMAL(12,2) NOT NULL DEFAULT 0,
-    FechaApertura DATE NOT NULL DEFAULT GETDATE(),
-    Estado VARCHAR(20) NOT NULL DEFAULT 'ACTIVO',
-    CONSTRAINT FK_Cuentas_Clientes FOREIGN KEY (IdCliente) REFERENCES Clientes(IdCliente),
-    CONSTRAINT CHK_TipoCuenta CHECK (TipoCuenta IN ('AHORROS', 'CORRIENTE')),
-    CONSTRAINT CHK_EstadoCuenta CHECK (Estado IN ('ACTIVO', 'INACTIVO', 'BLOQUEADA'))
+-- =============================================
+-- TABLA 2: cuenta
+-- =============================================
+CREATE TABLE cuenta (
+    id_cuenta INT PRIMARY KEY IDENTITY(1,1),
+    numero_cuenta VARCHAR(20) NOT NULL UNIQUE,
+    id_cliente INT NOT NULL,
+    tipo_cuenta VARCHAR(20) NOT NULL,
+    saldo DECIMAL(12,2) NOT NULL DEFAULT 0,
+    estado VARCHAR(20) NOT NULL DEFAULT 'ACTIVA',
+    fecha_apertura DATE NOT NULL,
+    CONSTRAINT FK_cuenta_cliente FOREIGN KEY (id_cliente) REFERENCES cliente(id_cliente),
+    CONSTRAINT CHK_tipo_cuenta CHECK (tipo_cuenta IN ('AHORROS', 'CORRIENTE'))
 );
+GO
 
--- Tabla Movimientos
-CREATE TABLE Movimientos (
-    IdMovimiento INT PRIMARY KEY IDENTITY(1,1),
-    IdCuenta INT NOT NULL,
-    TipoMovimiento VARCHAR(20) NOT NULL,
-    Monto DECIMAL(12,2) NOT NULL,
-    Fecha DATETIME NOT NULL DEFAULT GETDATE(),
-    Descripcion VARCHAR(200),
-    CONSTRAINT FK_Movimientos_Cuentas FOREIGN KEY (IdCuenta) REFERENCES Cuentas(IdCuenta),
-    CONSTRAINT CHK_TipoMovimiento CHECK (TipoMovimiento IN ('DEPOSITO', 'RETIRO', 'TRANSFERENCIA'))
+-- =============================================
+-- TABLA 3: movimiento
+-- =============================================
+CREATE TABLE movimiento (
+    id_movimiento INT PRIMARY KEY IDENTITY(1,1),
+    id_cuenta INT NOT NULL,
+    tipo_movimiento VARCHAR(20) NOT NULL,
+    monto DECIMAL(12,2) NOT NULL,
+    fecha_movimiento DATETIME NOT NULL DEFAULT GETDATE(),
+    descripcion VARCHAR(200),
+    CONSTRAINT FK_movimiento_cuenta FOREIGN KEY (id_cuenta) REFERENCES cuenta(id_cuenta),
+    CONSTRAINT CHK_tipo_movimiento CHECK (tipo_movimiento IN ('DEPOSITO', 'RETIRO', 'TRANSFERENCIA'))
 );
+GO
 
--- Tabla Creditos
-CREATE TABLE Creditos (
-    IdCredito INT PRIMARY KEY IDENTITY(1,1),
-    IdCliente INT NOT NULL,
-    MontoCreditoOtorgado DECIMAL(12,2) NOT NULL,
-    TasaInteres DECIMAL(5,2) NOT NULL,
-    NumeroCuotas INT NOT NULL,
-    FechaOtorgamiento DATETIME NOT NULL DEFAULT GETDATE(),
-    Estado VARCHAR(20) NOT NULL DEFAULT 'ACTIVO',
-    CONSTRAINT FK_Creditos_Clientes FOREIGN KEY (IdCliente) REFERENCES Clientes(IdCliente),
-    CONSTRAINT CHK_EstadoCredito CHECK (Estado IN ('ACTIVO', 'CANCELADO', 'VENCIDO')),
-    CONSTRAINT CHK_NumeroCuotas CHECK (NumeroCuotas BETWEEN 3 AND 24)
+-- =============================================
+-- TABLA 4: credito
+-- =============================================
+CREATE TABLE credito (
+    id_credito INT PRIMARY KEY IDENTITY(1,1),
+    id_cliente INT NOT NULL,
+    cedula VARCHAR(10) NOT NULL,
+    monto_credito DECIMAL(12,2) NOT NULL,
+    tasa_interes DECIMAL(5,2) NOT NULL,
+    numero_cuotas INT NOT NULL,
+    cuota_mensual DECIMAL(12,2) NOT NULL,
+    estado VARCHAR(20) NOT NULL DEFAULT 'ACTIVO',
+    fecha_otorgamiento DATETIME NOT NULL DEFAULT GETDATE(),
+    CONSTRAINT FK_credito_cliente FOREIGN KEY (id_cliente) REFERENCES cliente(id_cliente),
+    CONSTRAINT CHK_estado_credito CHECK (estado IN ('ACTIVO', 'CANCELADO', 'VENCIDO')),
+    CONSTRAINT CHK_numero_cuotas CHECK (numero_cuotas BETWEEN 3 AND 24)
 );
+GO
 
--- Tabla TablaAmortizacion
-CREATE TABLE TablaAmortizacion (
-    IdAmortizacion INT PRIMARY KEY IDENTITY(1,1),
-    IdCredito INT NOT NULL,
-    NumeroCuota INT NOT NULL,
-    ValorCuota DECIMAL(12,2) NOT NULL,
-    Interes DECIMAL(12,2) NOT NULL,
-    CapitalPagado DECIMAL(12,2) NOT NULL,
-    Saldo DECIMAL(12,2) NOT NULL,
-    CONSTRAINT FK_TablaAmortizacion_Creditos FOREIGN KEY (IdCredito) REFERENCES Creditos(IdCredito)
+-- =============================================
+-- TABLA 5: amortizacion
+-- =============================================
+CREATE TABLE amortizacion (
+    id_amortizacion INT PRIMARY KEY IDENTITY(1,1),
+    id_credito INT NOT NULL,
+    numero_cuota INT NOT NULL,
+    valor_cuota DECIMAL(12,2) NOT NULL,
+    interes_pagado DECIMAL(12,2) NOT NULL,
+    capital_pagado DECIMAL(12,2) NOT NULL,
+    saldo DECIMAL(12,2) NOT NULL,
+    fecha_vencimiento DATE NOT NULL,
+    CONSTRAINT FK_amortizacion_credito FOREIGN KEY (id_credito) REFERENCES credito(id_credito)
 );
+GO
 
 -- =============================================
 -- ÍNDICES
 -- =============================================
-
-CREATE INDEX IX_Clientes_Cedula ON Clientes(Cedula);
-CREATE INDEX IX_Cuentas_Cliente ON Cuentas(IdCliente);
-CREATE INDEX IX_Movimientos_Cuenta ON Movimientos(IdCuenta);
-CREATE INDEX IX_Movimientos_Fecha ON Movimientos(Fecha);
-CREATE INDEX IX_Creditos_Cliente ON Creditos(IdCliente);
-CREATE INDEX IX_TablaAmortizacion_Credito ON TablaAmortizacion(IdCredito);
-
+CREATE INDEX idx_cliente_cedula ON cliente(cedula);
+CREATE INDEX idx_cuenta_cliente ON cuenta(id_cliente);
+CREATE INDEX idx_movimiento_cuenta ON movimiento(id_cuenta);
+CREATE INDEX idx_movimiento_fecha ON movimiento(fecha_movimiento);
+CREATE INDEX idx_credito_cliente ON credito(id_cliente);
+CREATE INDEX idx_credito_cedula ON credito(cedula);
+CREATE INDEX idx_amortizacion_credito ON amortizacion(id_credito);
 GO
 
 -- =============================================
 -- DATOS DE PRUEBA
 -- =============================================
+INSERT INTO cliente (cedula, nombre, apellido, fecha_nacimiento, estado_civil, telefono, email, direccion, fecha_registro) VALUES
+('1234567890', 'Juan', 'Pérez', '1990-05-15', 'Casado', '0998765432', 'juan.perez@email.com', 'Av. Principal 123', GETDATE()),
+('0987654321', 'María', 'González', '1985-08-20', 'Soltera', '0987654321', 'maria.gonzalez@email.com', 'Calle Secundaria 456', GETDATE()),
+('1122334455', 'Carlos', 'Rodríguez', '1992-03-10', 'Casado', '0991234567', 'carlos.rodriguez@email.com', 'Urbanización Los Pinos 789', GETDATE()),
+('2233445566', 'Ana', 'Martínez', '1988-11-25', 'Casada', '0998887766', 'ana.martinez@email.com', 'Barrio Central 321', GETDATE()),
+('3344556677', 'Luis', 'Sánchez', '1995-07-08', 'Soltero', '0987776655', 'luis.sanchez@email.com', 'Conjunto Habitacional 654', GETDATE());
 
--- Insertar 5 clientes
-INSERT INTO Clientes (Cedula, Nombres, Apellidos, FechaNacimiento, EstadoCivil, Direccion, Telefono, Email, Estado) VALUES
-('1234567890', 'Juan Carlos', 'Pérez García', '1990-05-15', 'SOLTERO', 'Av. Principal 123, Quito', '0987654321', 'juan.perez@email.com', 'ACTIVO'),
-('0987654321', 'María Fernanda', 'López Torres', '1985-08-20', 'CASADO', 'Calle Secundaria 456, Guayaquil', '0912345678', 'maria.lopez@email.com', 'ACTIVO'),
-('1122334455', 'Pedro Antonio', 'Ramírez Silva', '1992-11-10', 'SOLTERO', 'Av. Los Pinos 789, Cuenca', '0998877665', 'pedro.ramirez@email.com', 'ACTIVO'),
-('5544332211', 'Ana Patricia', 'González Vega', '1988-03-25', 'CASADO', 'Calle Las Flores 321, Ambato', '0976543210', 'ana.gonzalez@email.com', 'ACTIVO'),
-('6677889900', 'Luis Miguel', 'Martínez Cruz', '1995-07-30', 'SOLTERO', 'Av. Central 654, Otavalo', '0965432109', 'luis.martinez@email.com', 'ACTIVO');
+INSERT INTO cuenta (numero_cuenta, id_cliente, tipo_cuenta, saldo, fecha_apertura) VALUES
+('1000000001', 1, 'AHORROS', 5000.00, '2024-01-15'),
+('1000000002', 2, 'CORRIENTE', 8000.00, '2024-02-20'),
+('1000000003', 3, 'AHORROS', 12000.00, '2024-03-10'),
+('1000000004', 4, 'AHORROS', 6500.00, '2024-04-05'),
+('1000000005', 5, 'CORRIENTE', 9500.00, '2024-05-12');
 
--- Insertar 5 cuentas
-INSERT INTO Cuentas (IdCliente, NumeroCuenta, TipoCuenta, Saldo, FechaApertura, Estado) VALUES
-(1, '001-0000001', 'AHORROS', 5000.00, '2023-01-15', 'ACTIVO'),
-(2, '001-0000002', 'AHORROS', 3500.00, '2023-02-20', 'ACTIVO'),
-(3, '001-0000003', 'CORRIENTE', 8000.00, '2023-03-10', 'ACTIVO'),
-(4, '001-0000004', 'AHORROS', 2500.00, '2023-04-05', 'ACTIVO'),
-(5, '001-0000005', 'AHORROS', 6000.00, '2023-05-12', 'ACTIVO');
+-- Movimientos (últimos 3 meses) - 50 registros
+INSERT INTO movimiento (id_cuenta, tipo_movimiento, monto, fecha_movimiento, descripcion) VALUES
+(1, 'DEPOSITO', 1000.00, DATEADD(day, -85, GETDATE()), 'Depósito en efectivo'),
+(1, 'DEPOSITO', 1500.00, DATEADD(day, -80, GETDATE()), 'Transferencia recibida'),
+(1, 'RETIRO', 500.00, DATEADD(day, -75, GETDATE()), 'Retiro cajero automático'),
+(1, 'DEPOSITO', 2000.00, DATEADD(day, -70, GETDATE()), 'Depósito cheque'),
+(1, 'RETIRO', 800.00, DATEADD(day, -65, GETDATE()), 'Pago tarjeta'),
+(1, 'DEPOSITO', 1200.00, DATEADD(day, -60, GETDATE()), 'Depósito efectivo'),
+(1, 'RETIRO', 600.00, DATEADD(day, -55, GETDATE()), 'Retiro ventanilla'),
+(1, 'DEPOSITO', 1800.00, DATEADD(day, -50, GETDATE()), 'Transferencia'),
+(1, 'RETIRO', 700.00, DATEADD(day, -45, GETDATE()), 'Compra establecimiento'),
+(1, 'DEPOSITO', 1600.00, DATEADD(day, -40, GETDATE()), 'Depósito mensual'),
 
--- Insertar movimientos (últimos 3 meses)
--- Cliente 1 (Juan Pérez) - Buen historial
-INSERT INTO Movimientos (IdCuenta, TipoMovimiento, Monto, Fecha, Descripcion) VALUES
--- Hace 3 meses
-(1, 'DEPOSITO', 500.00, DATEADD(month, -3, GETDATE()), 'Depósito mensual'),
-(1, 'RETIRO', 200.00, DATEADD(day, -85, GETDATE()), 'Retiro cajero'),
-(1, 'DEPOSITO', 500.00, DATEADD(day, -80, GETDATE()), 'Depósito nómina'),
-(1, 'RETIRO', 150.00, DATEADD(day, -75, GETDATE()), 'Pago servicios'),
--- Hace 2 meses
-(1, 'DEPOSITO', 500.00, DATEADD(month, -2, GETDATE()), 'Depósito mensual'),
-(1, 'RETIRO', 180.00, DATEADD(day, -55, GETDATE()), 'Compra supermercado'),
-(1, 'DEPOSITO', 500.00, DATEADD(day, -50, GETDATE()), 'Depósito nómina'),
-(1, 'RETIRO', 170.00, DATEADD(day, -45, GETDATE()), 'Pago tarjeta'),
--- Hace 1 mes
-(1, 'DEPOSITO', 500.00, DATEADD(month, -1, GETDATE()), 'Depósito mensual'),
-(1, 'RETIRO', 175.00, DATEADD(day, -25, GETDATE()), 'Retiro cajero'),
-(1, 'DEPOSITO', 500.00, DATEADD(day, -20, GETDATE()), 'Depósito nómina'),
-(1, 'RETIRO', 160.00, DATEADD(day, -15, GETDATE()), 'Compras varias');
+(2, 'DEPOSITO', 2500.00, DATEADD(day, -88, GETDATE()), 'Depósito inicial'),
+(2, 'RETIRO', 1000.00, DATEADD(day, -82, GETDATE()), 'Retiro cajero'),
+(2, 'DEPOSITO', 3000.00, DATEADD(day, -76, GETDATE()), 'Transferencia recibida'),
+(2, 'RETIRO', 1500.00, DATEADD(day, -70, GETDATE()), 'Pago proveedor'),
+(2, 'DEPOSITO', 2200.00, DATEADD(day, -64, GETDATE()), 'Depósito cheque'),
+(2, 'RETIRO', 1200.00, DATEADD(day, -58, GETDATE()), 'Retiro ventanilla'),
+(2, 'DEPOSITO', 2800.00, DATEADD(day, -52, GETDATE()), 'Transferencia'),
+(2, 'RETIRO', 1800.00, DATEADD(day, -46, GETDATE()), 'Pago servicios'),
+(2, 'DEPOSITO', 2600.00, DATEADD(day, -40, GETDATE()), 'Depósito efectivo'),
+(2, 'RETIRO', 1400.00, DATEADD(day, -34, GETDATE()), 'Retiro cajero'),
 
--- Cliente 2 (María López) - Buen historial
-INSERT INTO Movimientos (IdCuenta, TipoMovimiento, Monto, Fecha, Descripcion) VALUES
-(2, 'DEPOSITO', 600.00, DATEADD(day, -90, GETDATE()), 'Depósito mensual'),
-(2, 'RETIRO', 250.00, DATEADD(day, -85, GETDATE()), 'Retiro cajero'),
-(2, 'DEPOSITO', 600.00, DATEADD(day, -60, GETDATE()), 'Depósito mensual'),
-(2, 'RETIRO', 220.00, DATEADD(day, -55, GETDATE()), 'Pago servicios'),
-(2, 'DEPOSITO', 600.00, DATEADD(day, -30, GETDATE()), 'Depósito mensual'),
-(2, 'RETIRO', 200.00, DATEADD(day, -25, GETDATE()), 'Compras'),
-(2, 'DEPOSITO', 600.00, DATEADD(day, -10, GETDATE()), 'Depósito nómina'),
-(2, 'RETIRO', 230.00, DATEADD(day, -5, GETDATE()), 'Retiro cajero');
+(3, 'DEPOSITO', 3500.00, DATEADD(day, -87, GETDATE()), 'Depósito salario'),
+(3, 'RETIRO', 2000.00, DATEADD(day, -81, GETDATE()), 'Retiro efectivo'),
+(3, 'DEPOSITO', 4000.00, DATEADD(day, -75, GETDATE()), 'Depósito adicional'),
+(3, 'RETIRO', 1500.00, DATEADD(day, -69, GETDATE()), 'Pago cuota'),
+(3, 'DEPOSITO', 3800.00, DATEADD(day, -63, GETDATE()), 'Transferencia'),
+(3, 'RETIRO', 2500.00, DATEADD(day, -57, GETDATE()), 'Retiro ventanilla'),
+(3, 'DEPOSITO', 4200.00, DATEADD(day, -51, GETDATE()), 'Depósito mensual'),
+(3, 'RETIRO', 1800.00, DATEADD(day, -45, GETDATE()), 'Compra online'),
+(3, 'DEPOSITO', 3900.00, DATEADD(day, -39, GETDATE()), 'Depósito cheque'),
+(3, 'RETIRO', 2200.00, DATEADD(day, -33, GETDATE()), 'Retiro cajero'),
 
--- Cliente 3 (Pedro Ramírez)
-INSERT INTO Movimientos (IdCuenta, TipoMovimiento, Monto, Fecha, Descripcion) VALUES
-(3, 'DEPOSITO', 800.00, DATEADD(day, -90, GETDATE()), 'Depósito negocio'),
-(3, 'RETIRO', 300.00, DATEADD(day, -85, GETDATE()), 'Retiro'),
-(3, 'DEPOSITO', 750.00, DATEADD(day, -60, GETDATE()), 'Depósito negocio'),
-(3, 'RETIRO', 280.00, DATEADD(day, -55, GETDATE()), 'Pago proveedores'),
-(3, 'DEPOSITO', 820.00, DATEADD(day, -30, GETDATE()), 'Depósito negocio'),
-(3, 'RETIRO', 320.00, DATEADD(day, -25, GETDATE()), 'Compras'),
-(3, 'DEPOSITO', 780.00, DATEADD(day, -10, GETDATE()), 'Depósito negocio'),
-(3, 'RETIRO', 290.00, DATEADD(day, -5, GETDATE()), 'Retiro');
+(4, 'DEPOSITO', 1800.00, DATEADD(day, -86, GETDATE()), 'Depósito inicial'),
+(4, 'RETIRO', 900.00, DATEADD(day, -80, GETDATE()), 'Retiro efectivo'),
+(4, 'DEPOSITO', 2100.00, DATEADD(day, -74, GETDATE()), 'Transferencia'),
+(4, 'RETIRO', 1100.00, DATEADD(day, -68, GETDATE()), 'Pago tarjeta'),
+(4, 'DEPOSITO', 1900.00, DATEADD(day, -62, GETDATE()), 'Depósito cheque'),
+(4, 'RETIRO', 1000.00, DATEADD(day, -56, GETDATE()), 'Retiro ventanilla'),
+(4, 'DEPOSITO', 2300.00, DATEADD(day, -50, GETDATE()), 'Depósito salario'),
+(4, 'RETIRO', 1200.00, DATEADD(day, -44, GETDATE()), 'Compra'),
+(4, 'DEPOSITO', 2000.00, DATEADD(day, -38, GETDATE()), 'Transferencia'),
+(4, 'RETIRO', 950.00, DATEADD(day, -32, GETDATE()), 'Retiro cajero'),
 
--- Cliente 4 (Ana González)
-INSERT INTO Movimientos (IdCuenta, TipoMovimiento, Monto, Fecha, Descripcion) VALUES
-(4, 'DEPOSITO', 400.00, DATEADD(day, -90, GETDATE()), 'Depósito mensual'),
-(4, 'RETIRO', 150.00, DATEADD(day, -85, GETDATE()), 'Retiro'),
-(4, 'DEPOSITO', 420.00, DATEADD(day, -60, GETDATE()), 'Depósito mensual'),
-(4, 'RETIRO', 140.00, DATEADD(day, -55, GETDATE()), 'Compras'),
-(4, 'DEPOSITO', 410.00, DATEADD(day, -30, GETDATE()), 'Depósito mensual'),
-(4, 'RETIRO', 160.00, DATEADD(day, -25, GETDATE()), 'Pago servicios'),
-(4, 'DEPOSITO', 430.00, DATEADD(day, -10, GETDATE()), 'Depósito mensual'),
-(4, 'RETIRO', 155.00, DATEADD(day, -5, GETDATE()), 'Retiro');
-
--- Cliente 5 (Luis Martínez)
-INSERT INTO Movimientos (IdCuenta, TipoMovimiento, Monto, Fecha, Descripcion) VALUES
-(5, 'DEPOSITO', 550.00, DATEADD(day, -90, GETDATE()), 'Depósito mensual'),
-(5, 'RETIRO', 180.00, DATEADD(day, -85, GETDATE()), 'Retiro'),
-(5, 'DEPOSITO', 560.00, DATEADD(day, -60, GETDATE()), 'Depósito mensual'),
-(5, 'RETIRO', 190.00, DATEADD(day, -55, GETDATE()), 'Compras'),
-(5, 'DEPOSITO', 540.00, DATEADD(day, -30, GETDATE()), 'Depósito mensual'),
-(5, 'RETIRO', 175.00, DATEADD(day, -25, GETDATE()), 'Pago servicios'),
-(5, 'DEPOSITO', 570.00, DATEADD(day, -10, GETDATE()), 'Depósito mensual'),
-(5, 'RETIRO', 185.00, DATEADD(day, -5, GETDATE()), 'Retiro');
+(5, 'DEPOSITO', 2800.00, DATEADD(day, -89, GETDATE()), 'Depósito mensual'),
+(5, 'RETIRO', 1600.00, DATEADD(day, -83, GETDATE()), 'Retiro efectivo'),
+(5, 'DEPOSITO', 3200.00, DATEADD(day, -77, GETDATE()), 'Transferencia'),
+(5, 'RETIRO', 1400.00, DATEADD(day, -71, GETDATE()), 'Pago servicios'),
+(5, 'DEPOSITO', 2900.00, DATEADD(day, -65, GETDATE()), 'Depósito cheque'),
+(5, 'RETIRO', 1700.00, DATEADD(day, -59, GETDATE()), 'Retiro ventanilla'),
+(5, 'DEPOSITO', 3100.00, DATEADD(day, -53, GETDATE()), 'Depósito salario'),
+(5, 'RETIRO', 1900.00, DATEADD(day, -47, GETDATE()), 'Compra establecimiento'),
+(5, 'DEPOSITO', 3000.00, DATEADD(day, -41, GETDATE()), 'Transferencia'),
+(5, 'RETIRO', 1550.00, DATEADD(day, -35, GETDATE()), 'Retiro cajero');
 
 GO
-
 -- =============================================
 -- CONSULTAS DE VERIFICACIÓN
 -- =============================================
 
 -- Verificar clientes
-SELECT * FROM Clientes;
+SELECT * FROM cliente;
 
 -- Verificar cuentas
-SELECT * FROM Cuentas;
+SELECT * FROM cuenta;
 
 -- Verificar movimientos (últimos 3 meses)
 SELECT 
-    c.Nombres + ' ' + c.Apellidos AS Cliente,
-    cu.NumeroCuenta,
-    m.TipoMovimiento,
-    m.Monto,
-    m.Fecha
-FROM Movimientos m
-INNER JOIN Cuentas cu ON m.IdCuenta = cu.IdCuenta
-INNER JOIN Clientes c ON cu.IdCliente = c.IdCliente
-WHERE m.Fecha >= DATEADD(month, -3, GETDATE())
-ORDER BY c.Apellidos, m.Fecha DESC;
+    c.nombre + ' ' + c.apellido AS Cliente,
+    cu.numero_cuenta AS NumeroCuenta,
+    m.tipo_movimiento AS TipoMovimiento,
+    m.monto AS Monto,
+    m.fecha_movimiento AS Fecha
+FROM movimiento m
+INNER JOIN cuenta cu ON m.id_cuenta = cu.id_cuenta
+INNER JOIN cliente c ON cu.id_cliente = c.id_cliente
+WHERE m.fecha_movimiento >= DATEADD(month, -3, GETDATE())
+ORDER BY c.apellido, m.fecha_movimiento DESC;
 
 -- Calcular monto máximo para cliente 1 (ejemplo)
 SELECT 
-    c.Nombres + ' ' + c.Apellidos AS Cliente,
-    AVG(CASE WHEN m.TipoMovimiento = 'DEPOSITO' THEN m.Monto ELSE 0 END) AS PromedioDepositos,
-    AVG(CASE WHEN m.TipoMovimiento = 'RETIRO' THEN m.Monto ELSE 0 END) AS PromedioRetiros,
-    ((AVG(CASE WHEN m.TipoMovimiento = 'DEPOSITO' THEN m.Monto ELSE 0 END) - 
-      AVG(CASE WHEN m.TipoMovimiento = 'RETIRO' THEN m.Monto ELSE 0 END)) * 0.60) * 9 AS MontoMaximoCredito
-FROM Movimientos m
-INNER JOIN Cuentas cu ON m.IdCuenta = cu.IdCuenta
-INNER JOIN Clientes c ON cu.IdCliente = c.IdCliente
-WHERE c.IdCliente = 1 
-AND m.Fecha >= DATEADD(month, -3, GETDATE())
-GROUP BY c.Nombres, c.Apellidos;
+    c.nombre + ' ' + c.apellido AS Cliente,
+    AVG(CASE WHEN m.tipo_movimiento = 'DEPOSITO' THEN m.monto ELSE 0 END) AS PromedioDepositos,
+    AVG(CASE WHEN m.tipo_movimiento = 'RETIRO' THEN m.monto ELSE 0 END) AS PromedioRetiros,
+    ((AVG(CASE WHEN m.tipo_movimiento = 'DEPOSITO' THEN m.monto ELSE 0 END) - 
+      AVG(CASE WHEN m.tipo_movimiento = 'RETIRO' THEN m.monto ELSE 0 END)) * 0.60) * 9 AS MontoMaximoCredito
+FROM movimiento m
+INNER JOIN cuenta cu ON m.id_cuenta = cu.id_cuenta
+INNER JOIN cliente c ON cu.id_cliente = c.id_cliente
+WHERE c.id_cliente = 1 
+AND m.fecha_movimiento >= DATEADD(month, -3, GETDATE())
+GROUP BY c.nombre, c.apellido;
 
-GO
+-- Estadísticas por cliente (todos los clientes)
+SELECT 
+    c.cedula AS Cedula,
+    c.nombre + ' ' + c.apellido AS Cliente,
+    COUNT(m.id_movimiento) AS TotalMovimientos,
+    AVG(CASE WHEN m.tipo_movimiento = 'DEPOSITO' THEN m.monto ELSE 0 END) AS PromedioDepositos,
+    AVG(CASE WHEN m.tipo_movimiento = 'RETIRO' THEN m.monto ELSE 0 END) AS PromedioRetiros,
+    CAST(((AVG(CASE WHEN m.tipo_movimiento = 'DEPOSITO' THEN m.monto ELSE 0 END) - 
+          AVG(CASE WHEN m.tipo_movimiento = 'RETIRO' THEN m.monto ELSE 0 END)) * 0.60) * 9 * 2 AS DECIMAL(12,2)) AS MontoMaximoCredito
+FROM cliente c
+INNER JOIN cuenta cu ON c.id_cliente = cu.id_cliente
+INNER JOIN movimiento m ON cu.id_cuenta = m.id_cuenta
+WHERE m.fecha_movimiento >= DATEADD(month, -3, GETDATE())
+GROUP BY c.cedula, c.nombre, c.apellido
+ORDER BY c.cedula;
 
--- =============================================
--- FIN DEL SCRIPT
--- =============================================
+-- Verificar créditos activos
+SELECT 
+    cr.id_credito AS IdCredito,
+    c.cedula AS Cedula,
+    c.nombre + ' ' + c.apellido AS Cliente,
+    cr.monto_credito AS MontoCredito,
+    cr.numero_cuotas AS NumeroCuotas,
+    cr.cuota_mensual AS CuotaMensual,
+    cr.estado AS Estado,
+    cr.fecha_otorgamiento AS FechaOtorgamiento
+FROM credito cr
+INNER JOIN cliente c ON cr.id_cliente = c.id_cliente
+WHERE cr.estado = 'ACTIVO'
+ORDER BY cr.id_credito;
 
-PRINT 'Script ejecutado exitosamente';
-PRINT 'Base de datos banquito_core creada con:';
-PRINT '- 5 clientes';
-PRINT '- 5 cuentas';
-PRINT '- 50+ movimientos';
-PRINT '- Tablas de Creditos y TablaAmortizacion creadas';
+-- Ver tabla de amortización de un crédito (ejemplo: crédito 1)
+SELECT 
+    numero_cuota AS NumeroCuota,
+    valor_cuota AS ValorCuota,
+    interes_pagado AS Interes,
+    capital_pagado AS Capital,
+    saldo AS Saldo,
+    fecha_vencimiento AS FechaVencimiento
+FROM amortizacion
+WHERE id_credito = 1
+ORDER BY numero_cuota;
+
 GO

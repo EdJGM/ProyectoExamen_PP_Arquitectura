@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ReferenceGroup xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ID="3ba868a5-11b0-47c9-ba1f-8bad2c5ca6bd" xmlns="urn:schemas-microsoft-com:xml-wcfservicemap">
+  <ClientOptions>
+    <GenerateAsynchronousMethods>false</GenerateAsynchronousMethods>
+    <GenerateTaskBasedAsynchronousMethod>true</GenerateTaskBasedAsynchronousMethod>
+    <EnableDataBinding>true</EnableDataBinding>
+    <ExcludedTypes />
+    <ImportXmlTypes>false</ImportXmlTypes>
+    <GenerateInternalTypes>false</GenerateInternalTypes>
+    <GenerateMessageContracts>false</GenerateMessageContracts>
+    <NamespaceMappings />
+    <CollectionMappings />
+    <GenerateSerializableTypes>true</GenerateSerializableTypes>
+    <Serializer>Auto</Serializer>
+    <UseSerializerForFaults>true</UseSerializerForFaults>
+    <ReferenceAllAssemblies>true</ReferenceAllAssemblies>
+    <ReferencedAssemblies />
+    <ReferencedDataContractTypes />
+    <ServiceContractMappings />
+  </ClientOptions>
+  <MetadataSources>
+    <MetadataSource Address="http://localhost:58001/ec.edu.monster.ws/BanQuitoWS.svc?wsdl" Protocol="http" SourceId="1" />
+  </MetadataSources>
+  <Metadata>
+    <MetadataFile FileName="BanQuitoWS.xsd" MetadataType="Schema" ID="cc2369e9-0b61-44a8-a5f6-629cc4c67109" SourceId="1" SourceUrl="http://localhost:58001/ec.edu.monster.ws/BanQuitoWS.svc?xsd=xsd0" />
+    <MetadataFile FileName="BanQuitoWS1.xsd" MetadataType="Schema" ID="b89c33a4-f066-47ad-bae3-d2cc5eee5208" SourceId="1" SourceUrl="http://localhost:58001/ec.edu.monster.ws/BanQuitoWS.svc?xsd=xsd1" />
+    <MetadataFile FileName="BanQuitoWS2.xsd" MetadataType="Schema" ID="9650c81d-0b5c-4867-be05-32e57dad6162" SourceId="1" SourceUrl="http://localhost:58001/ec.edu.monster.ws/BanQuitoWS.svc?xsd=xsd3" />
+    <MetadataFile FileName="BanQuitoWS.wsdl" MetadataType="Wsdl" ID="1eee8721-0824-407c-bd0f-7360ca07dcd0" SourceId="1" SourceUrl="http://localhost:58001/ec.edu.monster.ws/BanQuitoWS.svc?wsdl" />
+    <MetadataFile FileName="BanQuitoWS3.xsd" MetadataType="Schema" ID="dff25970-6505-4017-91c1-ac33ddb17b30" SourceId="1" SourceUrl="http://localhost:58001/ec.edu.monster.ws/BanQuitoWS.svc?xsd=xsd2" />
+  </Metadata>
+  <Extensions>
+    <ExtensionFile FileName="configuration91.svcinfo" Name="configuration91.svcinfo" />
+    <ExtensionFile FileName="configuration.svcinfo" Name="configuration.svcinfo" />
+  </Extensions>
+</ReferenceGroup>

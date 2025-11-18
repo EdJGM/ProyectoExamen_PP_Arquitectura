@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Runtime.Serialization;
 
 namespace BanQuito_Soap_Dotnet.ec.edu.monster.modelo
@@ -27,11 +27,15 @@ namespace BanQuito_Soap_Dotnet.ec.edu.monster.modelo
         [DataMember(Order = 7)]
         public decimal Saldo { get; set; }
 
+        // 
+        [DataMember(Order = 8)]
+        public DateTime FechaVencimiento { get; set; }
+
         public TablaAmortizacion() { }
 
-        public TablaAmortizacion(int idAmortizacion, int idCredito, int numeroCuota, 
-                                decimal valorCuota, decimal interes, decimal capitalPagado, 
-                                decimal saldo)
+        public TablaAmortizacion(int idAmortizacion, int idCredito, int numeroCuota,
+                                decimal valorCuota, decimal interes, decimal capitalPagado,
+                                decimal saldo, DateTime fechaVencimiento)
         {
             IdAmortizacion = idAmortizacion;
             IdCredito = idCredito;
@@ -40,6 +44,7 @@ namespace BanQuito_Soap_Dotnet.ec.edu.monster.modelo
             Interes = interes;
             CapitalPagado = capitalPagado;
             Saldo = saldo;
+            FechaVencimiento = fechaVencimiento; 
         }
     }
 }

@@ -10,27 +10,30 @@ namespace Comercializadora_Soap_Dotnet.ec.edu.monster.modelo
         public int IdFactura { get; set; }
 
         [DataMember(Order = 2)]
-        public string Cedula { get; set; }
+        public string NumeroFactura { get; set; }
 
         [DataMember(Order = 3)]
-        public string FormaPago { get; set; }
+        public string CedulaCliente { get; set; }
 
         [DataMember(Order = 4)]
-        public DateTime FechaVenta { get; set; }
+        public string NombreCliente { get; set; }
 
         [DataMember(Order = 5)]
-        public decimal Descuento { get; set; }
+        public DateTime FechaFactura { get; set; }
 
         [DataMember(Order = 6)]
         public decimal Subtotal { get; set; }
 
         [DataMember(Order = 7)]
-        public decimal Total { get; set; }
+        public decimal Descuento { get; set; }
 
         [DataMember(Order = 8)]
-        public int? IdCreditoBanco { get; set; }
+        public decimal Total { get; set; }
 
         [DataMember(Order = 9)]
+        public string FormaPago { get; set; }
+
+        [DataMember(Order = 10)]
         public string Estado { get; set; }
 
         public Factura() { }

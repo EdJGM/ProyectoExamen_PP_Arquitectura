@@ -25,7 +25,7 @@ namespace BanQuito_Soap_Dotnet.ec.edu.monster.servicio
                 cn.Open();
 
                 // REGLA 1: Verificar si es cliente del banco
-                string sqlCliente = "SELECT IdCliente, FechaNacimiento, EstadoCivil FROM Clientes WHERE Cedula = @cedula AND Estado = 'ACTIVO'";
+                string sqlCliente = "SELECT id_cliente, fecha_nacimiento, estado_civil FROM cliente WHERE cedula = @cedula";
                 SqlCommand cmdCliente = new SqlCommand(sqlCliente, cn);
                 cmdCliente.Parameters.AddWithValue("@cedula", cedula);
                 SqlDataReader drCliente = cmdCliente.ExecuteReader();
@@ -39,20 +39,20 @@ namespace BanQuito_Soap_Dotnet.ec.edu.monster.servicio
                     return respuesta;
                 }
 
-                int idCliente = Convert.ToInt32(drCliente["IdCliente"]);
-                DateTime fechaNacimiento = Convert.ToDateTime(drCliente["FechaNacimiento"]);
-                string estadoCivil = drCliente["EstadoCivil"].ToString();
+                int idCliente = Convert.ToInt32(drCliente["id_cliente"]);
+                DateTime fechaNacimiento = Convert.ToDateTime(drCliente["fecha_nacimiento"]);
+                string estadoCivil = drCliente["estado_civil"].ToString();
                 drCliente.Close();
 
                 // REGLA 2: Verificar que tenga al menos un depósito en el último mes
                 DateTime fechaLimite = DateTime.Now.AddMonths(-1);
                 string sqlDeposito = @"
                     SELECT COUNT(*) 
-                    FROM Movimientos m
-                    INNER JOIN Cuentas c ON m.IdCuenta = c.IdCuenta
-                    WHERE c.IdCliente = @idCliente 
-                    AND m.TipoMovimiento = 'DEPOSITO'
-                    AND m.Fecha >= @fechaLimite";
+                    FROM movimiento m
+                    INNER JOIN cuenta c ON m.id_cuenta = c.id_cuenta
+                    WHERE c.id_cliente = @idCliente 
+                    AND m.tipo_movimiento = 'DEPOSITO'
+                    AND m.fecha_movimiento >= @fechaLimite";
 
                 SqlCommand cmdDeposito = new SqlCommand(sqlDeposito, cn);
                 cmdDeposito.Parameters.AddWithValue("@idCliente", idCliente);
@@ -75,7 +75,7 @@ namespace BanQuito_Soap_Dotnet.ec.edu.monster.servicio
                 }
 
                 // REGLA 4: No debe tener crédito activo
-                string sqlCreditoActivo = "SELECT COUNT(*) FROM Creditos WHERE IdCliente = @idCliente AND Estado = 'ACTIVO'";
+                string sqlCreditoActivo = "SELECT COUNT(*) FROM credito WHERE id_cliente = @idCliente AND estado = 'ACTIVO'";
                 SqlCommand cmdCreditoActivo = new SqlCommand(sqlCreditoActivo, cn);
                 cmdCreditoActivo.Parameters.AddWithValue("@idCliente", idCliente);
                 int creditosActivos = Convert.ToInt32(cmdCreditoActivo.ExecuteScalar());
@@ -103,7 +103,7 @@ namespace BanQuito_Soap_Dotnet.ec.edu.monster.servicio
                 cn.Open();
 
                 // Obtener IdCliente
-                string sqlCliente = "SELECT IdCliente FROM Clientes WHERE Cedula = @cedula AND Estado = 'ACTIVO'";
+                string sqlCliente = "SELECT id_cliente FROM cliente WHERE cedula = @cedula";
                 SqlCommand cmdCliente = new SqlCommand(sqlCliente, cn);
                 cmdCliente.Parameters.AddWithValue("@cedula", cedula);
                 object objIdCliente = cmdCliente.ExecuteScalar();
@@ -116,11 +116,11 @@ namespace BanQuito_Soap_Dotnet.ec.edu.monster.servicio
                 // Obtener movimientos de los últimos 3 meses
                 DateTime fechaLimite = DateTime.Now.AddMonths(-3);
                 string sqlMovimientos = @"
-                    SELECT m.TipoMovimiento, m.Monto
-                    FROM Movimientos m
-                    INNER JOIN Cuentas c ON m.IdCuenta = c.IdCuenta
-                    WHERE c.IdCliente = @idCliente 
-                    AND m.Fecha >= @fechaLimite";
+                    SELECT m.tipo_movimiento, m.monto
+                    FROM movimiento m
+                    INNER JOIN cuenta c ON m.id_cuenta = c.id_cuenta
+                    WHERE c.id_cliente = @idCliente 
+                    AND m.fecha_movimiento >= @fechaLimite";
 
                 SqlCommand cmdMovimientos = new SqlCommand(sqlMovimientos, cn);
                 cmdMovimientos.Parameters.AddWithValue("@idCliente", idCliente);
@@ -133,8 +133,8 @@ namespace BanQuito_Soap_Dotnet.ec.edu.monster.servicio
 
                 while (dr.Read())
                 {
-                    string tipo = dr["TipoMovimiento"].ToString();
-                    decimal monto = Convert.ToDecimal(dr["Monto"]);
+                    string tipo = dr["tipo_movimiento"].ToString();
+                    decimal monto = Convert.ToDecimal(dr["monto"]);
 
                     if (tipo == "DEPOSITO")
                         depositos.Add(monto);
@@ -178,7 +178,7 @@ namespace BanQuito_Soap_Dotnet.ec.edu.monster.servicio
             double montoMaximo = ObtenerMontoMaximoCredito(cedula);
             if (precioElectrodomestico > montoMaximo)
             {
-                return new RespuestaCredito(false, 
+                return new RespuestaCredito(false,
                     $"El monto solicitado (${precioElectrodomestico:F2}) excede el máximo aprobado (${montoMaximo:F2})");
             }
 
@@ -190,28 +190,30 @@ namespace BanQuito_Soap_Dotnet.ec.edu.monster.servicio
                 try
                 {
                     // Obtener IdCliente
-                    string sqlCliente = "SELECT IdCliente FROM Clientes WHERE Cedula = @cedula";
+                    string sqlCliente = "SELECT id_cliente FROM cliente WHERE cedula = @cedula";
                     SqlCommand cmdCliente = new SqlCommand(sqlCliente, cn, tx);
                     cmdCliente.Parameters.AddWithValue("@cedula", cedula);
                     int idCliente = Convert.ToInt32(cmdCliente.ExecuteScalar());
 
+                    // Calcular cuota fija ANTES de insertar el crédito
+                    double tasaMensual = 0.18 / 12; // 18% anual (igual que Java)
+                    double denominador = (1 - Math.Pow(1 + tasaMensual, -numeroCuotas)) / tasaMensual;
+                    double cuotaFija = precioElectrodomestico / denominador;
+
                     // Insertar crédito
                     string sqlCredito = @"
-                        INSERT INTO Creditos (IdCliente, MontoCreditoOtorgado, TasaInteres, NumeroCuotas, FechaOtorgamiento, Estado)
-                        VALUES (@idCliente, @monto, 16.0, @numCuotas, GETDATE(), 'ACTIVO');
+                        INSERT INTO credito (id_cliente, cedula, monto_credito, tasa_interes, numero_cuotas, cuota_mensual, fecha_otorgamiento, estado)
+                        VALUES (@idCliente, @cedula, @monto, 18.0, @numCuotas, @cuotaMensual, GETDATE(), 'ACTIVO');
                         SELECT SCOPE_IDENTITY();";
 
                     SqlCommand cmdCredito = new SqlCommand(sqlCredito, cn, tx);
                     cmdCredito.Parameters.AddWithValue("@idCliente", idCliente);
+                    cmdCredito.Parameters.AddWithValue("@cedula", cedula);
                     cmdCredito.Parameters.AddWithValue("@monto", (decimal)precioElectrodomestico);
                     cmdCredito.Parameters.AddWithValue("@numCuotas", numeroCuotas);
+                    cmdCredito.Parameters.AddWithValue("@cuotaMensual", (decimal)cuotaFija);
 
                     int idCredito = Convert.ToInt32(cmdCredito.ExecuteScalar());
-
-                    // Calcular cuota fija
-                    double tasaMensual = 0.16 / 12; // 16% anual / 12 meses = 1.333% mensual
-                    double denominador = (1 - Math.Pow(1 + tasaMensual, -numeroCuotas)) / tasaMensual;
-                    double cuotaFija = precioElectrodomestico / denominador;
 
                     // Generar tabla de amortización
                     double saldo = precioElectrodomestico;
@@ -226,9 +228,12 @@ namespace BanQuito_Soap_Dotnet.ec.edu.monster.servicio
                         if (i == numeroCuotas)
                             saldo = 0;
 
+                        // Calcular fecha de vencimiento
+                        DateTime fechaVencimiento = DateTime.Now.AddMonths(i);
+
                         string sqlAmortizacion = @"
-                            INSERT INTO TablaAmortizacion (IdCredito, NumeroCuota, ValorCuota, Interes, CapitalPagado, Saldo)
-                            VALUES (@idCredito, @numCuota, @valorCuota, @interes, @capitalPagado, @saldo)";
+                            INSERT INTO amortizacion (id_credito, numero_cuota, valor_cuota, interes_pagado, capital_pagado, saldo, fecha_vencimiento)
+                            VALUES (@idCredito, @numCuota, @valorCuota, @interes, @capitalPagado, @saldo, @fechaVenc)";
 
                         SqlCommand cmdAmortizacion = new SqlCommand(sqlAmortizacion, cn, tx);
                         cmdAmortizacion.Parameters.AddWithValue("@idCredito", idCredito);
@@ -237,6 +242,7 @@ namespace BanQuito_Soap_Dotnet.ec.edu.monster.servicio
                         cmdAmortizacion.Parameters.AddWithValue("@interes", (decimal)interes);
                         cmdAmortizacion.Parameters.AddWithValue("@capitalPagado", (decimal)capitalPagado);
                         cmdAmortizacion.Parameters.AddWithValue("@saldo", (decimal)saldo);
+                        cmdAmortizacion.Parameters.AddWithValue("@fechaVenc", fechaVencimiento);
 
                         cmdAmortizacion.ExecuteNonQuery();
                     }
@@ -265,10 +271,10 @@ namespace BanQuito_Soap_Dotnet.ec.edu.monster.servicio
                 cn.Open();
 
                 string sql = @"
-                    SELECT IdAmortizacion, IdCredito, NumeroCuota, ValorCuota, Interes, CapitalPagado, Saldo
-                    FROM TablaAmortizacion
-                    WHERE IdCredito = @idCredito
-                    ORDER BY NumeroCuota";
+                    SELECT id_amortizacion, id_credito, numero_cuota, valor_cuota, interes_pagado, capital_pagado, saldo, fecha_vencimiento
+                    FROM amortizacion
+                    WHERE id_credito = @idCredito
+                    ORDER BY numero_cuota";
 
                 SqlCommand cmd = new SqlCommand(sql, cn);
                 cmd.Parameters.AddWithValue("@idCredito", idCredito);
@@ -279,13 +285,14 @@ namespace BanQuito_Soap_Dotnet.ec.edu.monster.servicio
                 {
                     lista.Add(new TablaAmortizacion
                     {
-                        IdAmortizacion = Convert.ToInt32(dr["IdAmortizacion"]),
-                        IdCredito = Convert.ToInt32(dr["IdCredito"]),
-                        NumeroCuota = Convert.ToInt32(dr["NumeroCuota"]),
-                        ValorCuota = Convert.ToDecimal(dr["ValorCuota"]),
-                        Interes = Convert.ToDecimal(dr["Interes"]),
-                        CapitalPagado = Convert.ToDecimal(dr["CapitalPagado"]),
-                        Saldo = Convert.ToDecimal(dr["Saldo"])
+                        IdAmortizacion = Convert.ToInt32(dr["id_amortizacion"]),
+                        IdCredito = Convert.ToInt32(dr["id_credito"]),
+                        NumeroCuota = Convert.ToInt32(dr["numero_cuota"]),
+                        ValorCuota = Convert.ToDecimal(dr["valor_cuota"]),
+                        Interes = Convert.ToDecimal(dr["interes_pagado"]),
+                        CapitalPagado = Convert.ToDecimal(dr["capital_pagado"]),
+                        Saldo = Convert.ToDecimal(dr["saldo"]),
+                        FechaVencimiento = Convert.ToDateTime(dr["fecha_vencimiento"])
                     });
                 }
             }

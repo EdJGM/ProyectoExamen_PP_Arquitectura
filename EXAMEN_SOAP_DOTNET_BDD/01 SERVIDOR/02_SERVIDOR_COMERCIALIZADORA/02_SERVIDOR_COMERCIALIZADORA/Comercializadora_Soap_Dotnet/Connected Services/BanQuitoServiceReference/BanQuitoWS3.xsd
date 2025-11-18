@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<xs:schema xmlns:tns="http://schemas.datacontract.org/2004/07/BanQuito_Soap_Dotnet.ec.edu.espe.modelo" elementFormDefault="qualified" targetNamespace="http://schemas.datacontract.org/2004/07/BanQuito_Soap_Dotnet.ec.edu.espe.modelo" xmlns:xs="http://www.w3.org/2001/XMLSchema">
-  <xs:import schemaLocation="http://localhost:58001/ec.edu.espe.ws/BanQuitoWS.svc?xsd=xsd3" namespace="http://schemas.microsoft.com/2003/10/Serialization/Arrays" />
+<xs:schema xmlns:tns="http://schemas.datacontract.org/2004/07/BanQuito_Soap_Dotnet.ec.edu.monster.modelo" elementFormDefault="qualified" targetNamespace="http://schemas.datacontract.org/2004/07/BanQuito_Soap_Dotnet.ec.edu.monster.modelo" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:import schemaLocation="http://localhost:58001/ec.edu.monster.ws/BanQuitoWS.svc?xsd=xsd3" namespace="http://schemas.microsoft.com/2003/10/Serialization/Arrays" />
   <xs:complexType name="respuestaValidacion">
     <xs:sequence>
       <xs:element minOccurs="0" name="EsSujetoCredito" type="xs:boolean" />

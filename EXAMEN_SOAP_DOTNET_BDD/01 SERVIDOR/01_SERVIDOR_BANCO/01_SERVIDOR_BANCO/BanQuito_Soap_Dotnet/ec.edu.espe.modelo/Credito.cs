@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Runtime.Serialization;
 
 namespace BanQuito_Soap_Dotnet.ec.edu.monster.modelo
@@ -12,32 +12,42 @@ namespace BanQuito_Soap_Dotnet.ec.edu.monster.modelo
         [DataMember(Order = 2)]
         public int IdCliente { get; set; }
 
+        // ✅ NUEVO CAMPO
         [DataMember(Order = 3)]
-        public decimal MontoCreditoOtorgado { get; set; }
+        public string Cedula { get; set; }
 
         [DataMember(Order = 4)]
-        public decimal TasaInteres { get; set; }
+        public decimal MontoCreditoOtorgado { get; set; }
 
         [DataMember(Order = 5)]
-        public int NumeroCuotas { get; set; }
+        public decimal TasaInteres { get; set; }
 
         [DataMember(Order = 6)]
+        public int NumeroCuotas { get; set; }
+
+        // ✅ NUEVO CAMPO
+        [DataMember(Order = 7)]
+        public decimal CuotaMensual { get; set; }
+
+        [DataMember(Order = 8)]
         public DateTime FechaOtorgamiento { get; set; }
 
-        [DataMember(Order = 7)]
+        [DataMember(Order = 9)]
         public string Estado { get; set; }
 
         public Credito() { }
 
-        public Credito(int idCredito, int idCliente, decimal montoCreditoOtorgado, 
-                      decimal tasaInteres, int numeroCuotas, DateTime fechaOtorgamiento, 
-                      string estado)
+        public Credito(int idCredito, int idCliente, string cedula, decimal montoCreditoOtorgado,
+                      decimal tasaInteres, int numeroCuotas, decimal cuotaMensual,
+                      DateTime fechaOtorgamiento, string estado)
         {
             IdCredito = idCredito;
             IdCliente = idCliente;
+            Cedula = cedula; //
             MontoCreditoOtorgado = montoCreditoOtorgado;
             TasaInteres = tasaInteres;
             NumeroCuotas = numeroCuotas;
+            CuotaMensual = cuotaMensual; //
             FechaOtorgamiento = fechaOtorgamiento;
             Estado = estado;
         }
