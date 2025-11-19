@@ -25,6 +25,7 @@ namespace ClienteMovil
             builder.Services.AddSingleton<ClienteUnificado>();
 
             // Registrar las páginas como transient para navegación
+            builder.Services.AddTransient<LoginPage>();
             builder.Services.AddTransient<ProductosPage>();
             builder.Services.AddTransient<FacturacionPage>();
             builder.Services.AddTransient<CreditoPage>();

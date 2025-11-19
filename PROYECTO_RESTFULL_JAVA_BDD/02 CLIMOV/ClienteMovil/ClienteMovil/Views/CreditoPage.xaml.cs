@@ -144,15 +144,13 @@ namespace ClienteMovil.Views
                 {
                     if (montoMaximo.Aprobado)
                     {
-                        LabelResultadoMonto.Text = $"💰 Monto máximo aprobado: ${montoMaximo.MontoMaximoCalculado:F2}";
+                        LabelResultadoMonto.Text = $"➡️ Monto Máximo: $ {montoMaximo.MontoMaximoAprobado:F2}";
                         LabelResultadoMonto.TextColor = UIConstants.SUCCESS_COLOR;
 
                         // Mostrar detalles del cálculo
                         var detalles = $"📊 DETALLES DEL CÁLCULO\n\n" +
-                                     $"📈 Promedio Depósitos (3 meses): ${montoMaximo.PromedioDepositos:F2}\n" +
-                                     $"📉 Promedio Retiros (3 meses): ${montoMaximo.PromedioRetiros:F2}\n" +
-                                     $"💵 Capacidad de pago mensual: ${montoMaximo.CapacidadPago:F2}\n" +
-                                     $"🏦 Monto máximo (9 meses): ${montoMaximo.MontoMaximoCalculado:F2}";
+                                        $"👤 Cédula: {cedula}\n" +
+                                        $"➡️ Monto Máximo: ${montoMaximo.MontoMaximoAprobado:F2}";
 
                         await DisplayAlert("Cálculo de Monto Máximo", detalles, "Entendido");
 

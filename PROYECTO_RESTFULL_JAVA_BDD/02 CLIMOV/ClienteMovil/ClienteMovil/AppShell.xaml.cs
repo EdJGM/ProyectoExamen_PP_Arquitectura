@@ -1,7 +1,7 @@
-﻿
-using ClienteMovil.Models;
+﻿using ClienteMovil.Models;
 using ClienteMovil.Services;
 using ClienteMovil.Utils;
+using ClienteMovil.Views;
 
 namespace ClienteMovil
 {
@@ -44,82 +44,127 @@ namespace ClienteMovil
                 if (frame != null)
                 {
                     frame.BackgroundColor = UIConstants.GetProtocolColor(protocolo);
+                    ProtocolLabel.TextColor = UIConstants.WHITE;
                 }
 
-                // Actualizar visibilidad de los menús
+                // Actualizar menús de cambio de protocolo
                 ActualizarMenusProtocolo(protocolo);
             }
         }
 
-        private void ActualizarMenusProtocolo(TipoProtocolo protocoloActual)
+        private void ActualizarMenusProtocolo(TipoProtocolo protocolo)
         {
-            // Mostrar/ocultar opciones de menú según el protocolo actual
-            MenuRest.IsEnabled = protocoloActual != TipoProtocolo.REST;
-            MenuSoap.IsEnabled = protocoloActual != TipoProtocolo.SOAP;
+            MenuRest.Text = protocolo == TipoProtocolo.REST ?
+                "✅ REST (Activo)" : "🔄 Cambiar a REST";
 
-            // Actualizar texto del menú activo
-            if (protocoloActual == TipoProtocolo.REST)
+            MenuSoap.Text = protocolo == TipoProtocolo.SOAP ?
+                "✅ SOAP (Activo)" : "🔄 Cambiar a SOAP";
+        }
+
+        // ========== EVENTOS DEL HEADER ==========
+
+        /// <summary>
+        /// Cerrar sesión (idéntico al cerrarSesion() de MainFrame.java)
+        /// </summary>
+        private async void OnCerrarSesionClicked(object sender, EventArgs e)
+        {
+            try
             {
-                MenuSoap.Text = "🔄 Cambiar a SOAP (.NET)";
+                // Confirmar cierre de sesión
+                bool confirmar = await DisplayAlert(
+                    "Cerrar Sesión",
+                    "¿Está seguro que desea cerrar la sesión?",
+                    "Sí, cerrar",
+                    "Cancelar"
+                );
+
+                if (!confirmar) return;
+
+                // Cerrar el flyout
+                Shell.Current.FlyoutIsPresented = false;
+
+                // Mostrar loading
+                await DisplayAlert("Cerrando Sesión", "Cerrando sesión...", "OK");
+
+                // Limpiar datos de sesión si es necesario
+                // _clienteService?.LimpiarSesion(); // Si tienes este método
+
+                // Navegar de vuelta al LoginPage (idéntico al Java)
+                Application.Current.MainPage = new NavigationPage(new LoginPage());
+
             }
-            else
+            catch (Exception ex)
             {
-                MenuRest.Text = "🔄 Cambiar a REST (Java)";
+                await DisplayAlert(
+                    "Error",
+                    $"Error al cerrar sesión: {ex.Message}",
+                    "Aceptar"
+                );
             }
         }
 
+        // ========== EVENTOS DE CAMBIO DE PROTOCOLO ==========
+
         private async void OnCambiarRestClicked(object sender, EventArgs e)
         {
-            await CambiarProtocolo(TipoProtocolo.REST);
+            if (_clienteService.ProtocoloActual != TipoProtocolo.REST)
+            {
+                await CambiarProtocoloAsync(TipoProtocolo.REST);
+            }
         }
 
         private async void OnCambiarSoapClicked(object sender, EventArgs e)
         {
-            await CambiarProtocolo(TipoProtocolo.SOAP);
+            if (_clienteService.ProtocoloActual != TipoProtocolo.SOAP)
+            {
+                await CambiarProtocoloAsync(TipoProtocolo.SOAP);
+            }
         }
 
-        private async Task CambiarProtocolo(TipoProtocolo nuevoProtocolo)
+        private async Task CambiarProtocoloAsync(TipoProtocolo nuevoProtocolo)
         {
             try
             {
-                // Mostrar loading
+                // Mostrar loading modal
                 var loadingPage = new ContentPage
                 {
+                    Title = "Cambiando Protocolo",
                     Content = new StackLayout
                     {
-                        Children =
-                        {
+                        Children = {
                             new ActivityIndicator { IsRunning = true, Color = UIConstants.PRIMARY_COLOR },
-                            new Label
-                            {
+                            new Label {
                                 Text = $"Cambiando a {UIConstants.GetProtocolDisplayName(nuevoProtocolo)}...",
                                 HorizontalOptions = LayoutOptions.Center,
-                                TextColor = UIConstants.DARK_GRAY,
                                 Margin = new Thickness(0, 20, 0, 0)
                             }
                         },
                         VerticalOptions = LayoutOptions.Center,
                         HorizontalOptions = LayoutOptions.Center
-                    },
-                    BackgroundColor = UIConstants.BACKGROUND_MAIN
+                    }
                 };
 
                 await Navigation.PushModalAsync(loadingPage);
 
                 // Cambiar protocolo
-                _clienteService?.CambiarProtocolo(nuevoProtocolo);
+                _clienteService.CambiarProtocolo(nuevoProtocolo);
 
                 // Actualizar UI
                 ActualizarProtocoloHeader();
 
-                // Probar conectividad con el nuevo protocolo
-                var conectividad = await _clienteService?.ProbarConectividadAsync();
+                // Probar conectividad
+                var conectividad = await _clienteService.ProbarConectividadAsync();
 
                 // Cerrar loading
                 await Navigation.PopModalAsync();
 
-                // Mostrar resultado
-                var mensaje = conectividad?.EstadoGeneral ?? "Protocolo cambiado";
+                var mensaje = conectividad?.ComercializadoraActiva == true ?
+                    "✅ Conectado exitosamente" :
+                    conectividad?.ComercializadoraActiva == true ?
+                    "⚠️ Solo BanQuito disponible" :
+                    "❌ Servicios no disponibles" +
+                    (conectividad != null ? "" : " - Usando fallback local");
+
                 var color = conectividad?.ColorGeneral ?? UIConstants.INFO_COLOR;
 
                 await DisplayAlert(

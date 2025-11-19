@@ -83,6 +83,16 @@ namespace ClienteMovil.Views
             ((CollectionView)sender).SelectedItem = null;
         }
 
+        //private async void OnProductoTapped(object sender, TappedEventArgs e)
+        //{
+        //    var frame = sender as Frame;
+        //    var producto = frame?.BindingContext as Electrodomestico;
+        //    if (producto != null)
+        //    {
+        //        await MostrarDetallesProducto(producto);
+        //    }
+        //}
+
         // ========== MÉTODOS PRINCIPALES ==========
 
         private async Task CargarProductosAsync()

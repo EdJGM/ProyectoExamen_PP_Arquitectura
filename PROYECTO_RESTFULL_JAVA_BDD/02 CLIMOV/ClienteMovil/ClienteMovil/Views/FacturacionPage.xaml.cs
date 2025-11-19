@@ -3,6 +3,7 @@ using ClienteMovil.Services;
 using ClienteMovil.Utils;
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.ObjectModel;
+using System.Text.Json;
 
 namespace ClienteMovil.Views
 {
@@ -228,7 +229,15 @@ namespace ClienteMovil.Views
                 await MostrarEstado("Procesando venta en efectivo...", UIConstants.INFO_COLOR, true);
 
                 var solicitud = CrearSolicitudVenta();
+
+                // DEBUG: Ver el JSON que se envía
+                await DebugSolicitudVenta(solicitud);
+                System.Diagnostics.Debug.WriteLine($"Endpoint: {ConfiguracionEndpoints.REST.VENTA_EFECTIVO}");
+
                 var resultado = await _clienteService.ProcesarVentaEfectivoAsync(solicitud);
+
+                System.Diagnostics.Debug.WriteLine($"Resultado exito: {resultado?.Exito}");
+                System.Diagnostics.Debug.WriteLine($"Resultado mensaje: {resultado?.Mensaje}");
 
                 if (resultado?.Exito == true)
                 {
@@ -239,11 +248,21 @@ namespace ClienteMovil.Views
                 {
                     var mensaje = resultado?.Mensaje ?? "Error desconocido";
                     await MostrarEstado($"❌ Error en venta: {mensaje}", UIConstants.DANGER_COLOR);
+
+                    // Mostrar error detallado
+                    await DisplayAlert("Error Detallado",
+                        $"Error en venta en efectivo:\n\n{mensaje}\n\nVerifique que los servicios estén activos.",
+                        "OK");
                 }
             }
             catch (Exception ex)
             {
+                System.Diagnostics.Debug.WriteLine($"Excepción ProcesarVentaEfectivoAsync: {ex}");
                 await MostrarEstado($"❌ Error: {ex.Message}", UIConstants.DANGER_COLOR);
+
+                await DisplayAlert("Error de Conexión",
+                    $"Error al conectar con el servidor:\n\n{ex.Message}\n\nVerifique:\n• Conexión de red\n• Servidores Java activos\n• IP correcta en configuración",
+                    "OK");
             }
         }
 
@@ -253,7 +272,7 @@ namespace ClienteMovil.Views
 
             if (!_clienteValidado || _validacionCliente?.SujetoCredito != true)
             {
-                await DisplayAlert("Error", "Debe validar que el cliente sea sujeto de crédito", "OK");
+                await DisplayAlert("Error", "Debe validar que el cliente sea sujeto de crédito antes de procesar venta a crédito", "OK");
                 return;
             }
 
@@ -264,7 +283,14 @@ namespace ClienteMovil.Views
                 var solicitud = CrearSolicitudVenta();
                 solicitud.NumeroCuotas = (int)StepperCuotas.Value;
 
+                // DEBUG: Ver el JSON que se envía
+                await DebugSolicitudVenta(solicitud);
+                System.Diagnostics.Debug.WriteLine($"Endpoint: {ConfiguracionEndpoints.REST.VENTA_CREDITO}");
+
                 var resultado = await _clienteService.ProcesarVentaCreditoAsync(solicitud);
+
+                System.Diagnostics.Debug.WriteLine($"Resultado exito: {resultado?.Exito}");
+                System.Diagnostics.Debug.WriteLine($"Resultado mensaje: {resultado?.Mensaje}");
 
                 if (resultado?.Exito == true)
                 {
@@ -275,11 +301,21 @@ namespace ClienteMovil.Views
                 {
                     var mensaje = resultado?.Mensaje ?? "Error desconocido";
                     await MostrarEstado($"❌ Error en venta a crédito: {mensaje}", UIConstants.DANGER_COLOR);
+
+                    // Mostrar error detallado
+                    await DisplayAlert("Error Detallado",
+                        $"Error en venta a crédito:\n\n{mensaje}\n\nPosibles causas:\n• Cliente no aprobado para crédito\n• Monto excede límite\n• Error de conectividad",
+                        "OK");
                 }
             }
             catch (Exception ex)
             {
+                System.Diagnostics.Debug.WriteLine($"Excepción ProcesarVentaCreditoAsync: {ex}");
                 await MostrarEstado($"❌ Error: {ex.Message}", UIConstants.DANGER_COLOR);
+
+                await DisplayAlert("Error de Conexión",
+                    $"Error al conectar con el servidor:\n\n{ex.Message}",
+                    "OK");
             }
         }
 
@@ -306,6 +342,19 @@ namespace ClienteMovil.Views
                 return false;
             }
 
+            if (cedula.Length != 10)
+            {
+                DisplayAlert("Error", "La cédula debe tener exactamente 10 dígitos", "OK");
+                return false;
+            }
+
+            var nombreCliente = EntryNombreCliente.Text?.Trim();
+            if (string.IsNullOrEmpty(nombreCliente))
+            {
+                DisplayAlert("Error", "Ingrese el nombre completo del cliente", "OK");
+                return false;
+            }
+
             return true;
         }
 
@@ -313,16 +362,40 @@ namespace ClienteMovil.Views
         {
             return new SolicitudVenta
             {
-                CedulaCliente = EntryCliente.Text.Trim(),
+                CedulaCliente = EntryCliente.Text?.Trim() ?? string.Empty,
+                NombreCliente = EntryNombreCliente.Text?.Trim() ?? string.Empty,
                 Items = _itemsVenta.ToList()
             };
+        }
+
+        // Método para debug - ver el JSON que se envía
+        private async Task<string> DebugSolicitudVenta(SolicitudVenta solicitud)
+        {
+            try
+            {
+                var json = JsonSerializer.Serialize(solicitud, new JsonSerializerOptions
+                {
+                    WriteIndented = true,
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                });
+
+                System.Diagnostics.Debug.WriteLine("=== JSON SOLICITUD VENTA ===");
+                System.Diagnostics.Debug.WriteLine(json);
+                System.Diagnostics.Debug.WriteLine("=============================");
+
+                return json;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error serializando: {ex.Message}");
+                return $"Error: {ex.Message}";
+            }
         }
 
         private async Task MostrarResultadoVenta(RespuestaVenta resultado, string tipoVenta)
         {
             var mensaje = $"🎉 VENTA {tipoVenta} EXITOSA\n\n" +
                          $"📄 Factura: #{resultado.IdFactura}\n" +
-                         $"💰 Total: ${resultado.Total:F2}\n" +
                          $"📅 Fecha: {DateTime.Now:dd/MM/yyyy HH:mm}";
 
             if (tipoVenta == "EFECTIVO")
@@ -382,6 +455,7 @@ namespace ClienteMovil.Views
         private void LimpiarFormulario()
         {
             EntryCliente.Text = string.Empty;
+            EntryNombreCliente.Text = string.Empty; // NUEVO: Limpiar el nombre
             LabelNombreCliente.Text = "Cliente no validado";
             LabelNombreCliente.TextColor = UIConstants.MEDIUM_GRAY;
 

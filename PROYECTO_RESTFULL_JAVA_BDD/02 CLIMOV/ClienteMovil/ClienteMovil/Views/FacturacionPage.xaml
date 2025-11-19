@@ -79,13 +79,23 @@
                                 Margin="8,0,0,0"
                                 Clicked="OnValidarClienteClicked" />
 
+                        <!-- Nombre del Cliente -->
+                        <Entry x:Name="EntryNombreCliente"
+                               Grid.Row="1" Grid.ColumnSpan="2"
+                               Placeholder="Nombre completo del cliente"
+                               BackgroundColor="{StaticResource BgSecondary}"
+                               TextColor="{StaticResource TextPrimary}"
+                               PlaceholderColor="{StaticResource TextSecondary}"
+                               HeightRequest="45"
+                               Margin="0,8,0,0" />
+
                         <!-- Resultado validación cliente -->
                         <Label x:Name="LabelNombreCliente"
-                               Grid.Row="1" Grid.ColumnSpan="2"
+                               Grid.Row="2" Grid.ColumnSpan="2"
                                Text="Cliente no validado"
                                FontSize="14"
                                TextColor="{StaticResource MediumGray}"
-                               Margin="0,8,0,0" />
+                               Margin="0,8,0,0" />                        
                     </Grid>
                 </StackLayout>
             </Frame>

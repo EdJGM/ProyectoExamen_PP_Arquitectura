@@ -438,16 +438,45 @@ namespace ClienteMovil.Services
         {
             try
             {
-                var json = JsonSerializer.Serialize(solicitud, _jsonOptions);
+                // DEBUG: Serializar sin naming policy para ver la estructura exacta
+                var json = JsonSerializer.Serialize(solicitud, new JsonSerializerOptions
+                {
+                    WriteIndented = true,
+                    // NO usar PropertyNamingPolicy para que use los JsonPropertyName exactos
+                });
+
+                System.Diagnostics.Debug.WriteLine("=== JSON ENVIADO AL SERVIDOR ===");
+                System.Diagnostics.Debug.WriteLine(json);
+                System.Diagnostics.Debug.WriteLine("================================");
+
                 var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+
+                System.Diagnostics.Debug.WriteLine($"Endpoint: {ConfiguracionEndpoints.REST.VENTA_EFECTIVO}");
 
                 var response = await _httpClient.PostAsync(ConfiguracionEndpoints.REST.VENTA_EFECTIVO, content);
                 var responseJson = await response.Content.ReadAsStringAsync();
 
-                return JsonSerializer.Deserialize<RespuestaVenta>(responseJson, _jsonOptions);
+                System.Diagnostics.Debug.WriteLine($"HTTP Status: {response.StatusCode}");
+                System.Diagnostics.Debug.WriteLine("=== RESPUESTA DEL SERVIDOR ===");
+                System.Diagnostics.Debug.WriteLine(responseJson);
+                System.Diagnostics.Debug.WriteLine("===============================");
+
+                if (response.IsSuccessStatusCode)
+                {
+                    return JsonSerializer.Deserialize<RespuestaVenta>(responseJson, _jsonOptions);
+                }
+                else
+                {
+                    return new RespuestaVenta
+                    {
+                        Exito = false,
+                        Mensaje = $"Error HTTP {response.StatusCode}: {responseJson}"
+                    };
+                }
             }
             catch (Exception ex)
             {
+                System.Diagnostics.Debug.WriteLine($"EXCEPCIÓN: {ex}");
                 return new RespuestaVenta
                 {
                     Exito = false,
@@ -455,6 +484,37 @@ namespace ClienteMovil.Services
                 };
             }
         }
+        //{
+        //    try
+        //    {
+        //        var json = JsonSerializer.Serialize(solicitud, _jsonOptions);
+        //        var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+
+        //        var response = await _httpClient.PostAsync(ConfiguracionEndpoints.REST.VENTA_EFECTIVO, content);
+        //        var responseJson = await response.Content.ReadAsStringAsync();
+
+        //        if (response.IsSuccessStatusCode)
+        //        {
+        //            return JsonSerializer.Deserialize<RespuestaVenta>(responseJson, _jsonOptions);
+        //        }
+        //        else
+        //        {
+        //            return new RespuestaVenta
+        //            {
+        //                Exito = false,
+        //                Mensaje = $"Error del servidor: {response.StatusCode}"
+        //            };
+        //        }
+        //    }   
+        //    catch (Exception ex)
+        //    {
+        //        return new RespuestaVenta
+        //        {
+        //            Exito = false,
+        //            Mensaje = $"Error: {ex.Message}"
+        //        };
+        //    }
+        //}
 
         private async Task<RespuestaVenta?> ProcesarVentaCreditoREST(SolicitudVenta solicitud)
         {
@@ -466,7 +526,18 @@ namespace ClienteMovil.Services
                 var response = await _httpClient.PostAsync(ConfiguracionEndpoints.REST.VENTA_CREDITO, content);
                 var responseJson = await response.Content.ReadAsStringAsync();
 
-                return JsonSerializer.Deserialize<RespuestaVenta>(responseJson, _jsonOptions);
+                if (response.IsSuccessStatusCode)
+                {
+                    return JsonSerializer.Deserialize<RespuestaVenta>(responseJson, _jsonOptions);
+                }
+                else
+                {
+                    return new RespuestaVenta
+                    {
+                        Exito = false,
+                        Mensaje = $"Error del servidor: {response.StatusCode}"
+                    };
+                }
             }
             catch (Exception ex)
             {
@@ -510,22 +581,39 @@ namespace ClienteMovil.Services
         {
             try
             {
-                var response = await _httpClient.GetAsync(ConfiguracionEndpoints.REST.MontoMaximo(cedula));
+                var endpoint = ConfiguracionEndpoints.REST.MontoMaximo(cedula);
+                System.Diagnostics.Debug.WriteLine($"Consultando monto máximo: {endpoint}");
+
+                var response = await _httpClient.GetAsync(endpoint);
+                var responseJson = await response.Content.ReadAsStringAsync();
+
+                System.Diagnostics.Debug.WriteLine($"HTTP Status: {response.StatusCode}");
+                System.Diagnostics.Debug.WriteLine("=== RESPUESTA MONTO MÁXIMO ===");
+                System.Diagnostics.Debug.WriteLine(responseJson);
+                System.Diagnostics.Debug.WriteLine("===============================");
 
                 if (response.IsSuccessStatusCode)
                 {
-                    var json = await response.Content.ReadAsStringAsync();
-                    return JsonSerializer.Deserialize<MontoMaximo>(json, _jsonOptions);
-                }
+                    var resultado = JsonSerializer.Deserialize<MontoMaximo>(responseJson, _jsonOptions);
 
-                return new MontoMaximo
+                    System.Diagnostics.Debug.WriteLine($"Deserializado - Aprobado: {resultado?.Aprobado}");
+                    System.Diagnostics.Debug.WriteLine($"Deserializado - Monto: {resultado?.MontoMaximoAprobado}");
+                    System.Diagnostics.Debug.WriteLine($"Deserializado - Mensaje: {resultado?.Mensaje}");
+
+                    return resultado;
+                }
+                else
                 {
-                    Aprobado = false,
-                    Mensaje = "Error en el servicio"
-                };
+                    return new MontoMaximo
+                    {
+                        Aprobado = false,
+                        Mensaje = $"Error HTTP {response.StatusCode}: {responseJson}"
+                    };
+                }
             }
             catch (Exception ex)
             {
+                System.Diagnostics.Debug.WriteLine($"EXCEPCIÓN MontoMaximo: {ex}");
                 return new MontoMaximo
                 {
                     Aprobado = false,

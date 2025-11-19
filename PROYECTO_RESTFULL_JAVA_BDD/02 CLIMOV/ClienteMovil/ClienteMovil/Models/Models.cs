@@ -72,7 +72,7 @@ namespace ClienteMovil.Models
 
     public class SolicitudVenta
     {
-        [JsonPropertyName("cedulaCliente")]
+        [JsonPropertyName("cedula")]
         public string CedulaCliente { get; set; } = string.Empty;
 
         [JsonPropertyName("nombreCliente")]
@@ -86,6 +86,8 @@ namespace ClienteMovil.Models
 
         // Propiedades calculadas
         public decimal Total => Items.Sum(item => item.Subtotal);
+        public string TotalFormateado => $"${Total:F2}";
+
         public int TotalItems => Items.Sum(item => item.Cantidad);
     }
 
@@ -174,7 +176,7 @@ namespace ClienteMovil.Models
         [JsonPropertyName("idFactura")]
         public int? IdFactura { get; set; }
 
-        [JsonPropertyName("idCredito")]
+        [JsonPropertyName("idCreditoBanco")]
         public int? IdCredito { get; set; }
 
         [JsonPropertyName("total")]
@@ -220,9 +222,14 @@ namespace ClienteMovil.Models
         [JsonPropertyName("aprobado")]
         public bool Aprobado { get; set; }
 
-        [JsonPropertyName("montoMaximoCalculado")]
-        public decimal MontoMaximoCalculado { get; set; }
+        // CORREGIDO: El campo en la API Java puede ser diferente
+        [JsonPropertyName("montoMaximo")]
+        public decimal MontoMaximoAprobado { get; set; }
 
+        [JsonPropertyName("mensaje")]
+        public string Mensaje { get; set; } = string.Empty;
+
+        // CAMPOS ADICIONALES que podrían venir del servidor
         [JsonPropertyName("promedioDepositos")]
         public decimal PromedioDepositos { get; set; }
 
@@ -232,11 +239,8 @@ namespace ClienteMovil.Models
         [JsonPropertyName("capacidadPago")]
         public decimal CapacidadPago { get; set; }
 
-        [JsonPropertyName("mensaje")]
-        public string Mensaje { get; set; } = string.Empty;
-
         // Para UI
-        public string MontoFormateado => $"${MontoMaximoCalculado:F2}";
+        public string MontoFormateado => $"${MontoMaximoAprobado:F2}";
         public string EstadoTexto => Aprobado ? "APROBADO" : "RECHAZADO";
         public Color EstadoColor => Aprobado ? Utils.UIConstants.SUCCESS_COLOR : Utils.UIConstants.DANGER_COLOR;
     }
@@ -359,8 +363,8 @@ namespace ClienteMovil.Models
         // REST Endpoints (Java) - idénticos al cliente de escritorio
         public static class REST
         {
-            public const string BASE_COMERCIALIZADORA = "http://localhost:8080/ComercializadoraElectrodomesticos/api";
-            public const string BASE_BANQUITO = "http://localhost:8080/BanquitoCore/api/credito";
+            public const string BASE_COMERCIALIZADORA = "http://192.168.1.4:8080/ComercializadoraElectrodomesticos/api";
+            public const string BASE_BANQUITO = "http://192.168.1.4:8080/BanquitoCore/api/credito";
 
             // Electrodomésticos
             public const string ELECTRODOMESTICOS = BASE_COMERCIALIZADORA + "/electrodomesticos";

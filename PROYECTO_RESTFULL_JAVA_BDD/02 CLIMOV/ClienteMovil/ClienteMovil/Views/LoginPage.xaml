@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="ClienteMovil.Views.LoginPage"
+             Title="Login - ESPE Comercializadora"
+             BackgroundColor="{StaticResource BgPrimary}"
+             Shell.NavBarIsVisible="False">
+
+        <!-- FORMULARIO DE LOGIN CENTRADO -->
+    <ScrollView>
+        <StackLayout Padding="40,60" 
+                    Spacing="30"
+                    VerticalOptions="Center"
+                    HorizontalOptions="Center"
+                    WidthRequest="400">
+
+            <!-- Logo y títulos -->
+            <StackLayout Spacing="15" HorizontalOptions="Center" Margin="0,0,0,40">
+                <!-- Logo -->
+                <Label Text="🛍️" 
+                           FontSize="64"
+                           HorizontalOptions="Center"
+                           TextColor="{StaticResource Primary}" />
+
+                <!-- Título Principal -->
+                <Label Text="ESPE Comercializadora"
+                           FontSize="28"
+                           FontAttributes="Bold"
+                           HorizontalOptions="Center"
+                           TextColor="{StaticResource TextPrimary}"
+                           HorizontalTextAlignment="Center" />
+
+                <!-- Subtítulo -->
+                <Label Text="Sistema Integrado Bancario"
+                           FontSize="16"
+                           HorizontalOptions="Center"
+                           TextColor="{StaticResource TextSecondary}"
+                           HorizontalTextAlignment="Center" />
+
+                <Label Text="Protocolos SOAP &amp; REST"
+                           FontSize="14"
+                           HorizontalOptions="Center"
+                           TextColor="{StaticResource Primary}"
+                           HorizontalTextAlignment="Center"
+                           FontAttributes="Bold" />
+            </StackLayout>
+
+            <!-- Campo Usuario -->
+            <StackLayout Spacing="8">
+                <StackLayout Orientation="Horizontal" Spacing="12">
+                    <Label Text="👤" 
+                               FontSize="28" 
+                               VerticalOptions="Center"
+                               WidthRequest="40" />
+                    <Entry x:Name="EntryUsuario"
+                               Placeholder="Usuario"
+                               Text="MONSTER"
+                               FontSize="18"
+                               HeightRequest="40"
+                               HorizontalOptions="FillAndExpand"
+                               BackgroundColor="{StaticResource BgCard}"
+                               TextColor="{StaticResource BgCard}" />
+                </StackLayout>
+            </StackLayout>
+
+            <!-- Campo Contraseña -->
+            <StackLayout Spacing="8">
+                <StackLayout Orientation="Horizontal" Spacing="12">
+                    <Label Text="🔒" 
+                               FontSize="28" 
+                               VerticalOptions="Center"
+                               WidthRequest="40" />
+                    <Entry x:Name="EntryContrasena"
+                               Placeholder="Contraseña"
+                               Text="MONSTER9"
+                               IsPassword="True"
+                               FontSize="18"
+                               HeightRequest="40"
+                               HorizontalOptions="FillAndExpand"
+                               BackgroundColor="{StaticResource BgCard}"
+                               TextColor="{StaticResource BgCard}"
+                               ReturnCommand="{Binding LoginCommand}" />
+                </StackLayout>
+            </StackLayout>
+
+            <!-- Campo Protocolo -->
+            <StackLayout Spacing="8">
+                <StackLayout Orientation="Horizontal" Spacing="12">
+                    <Label Text="🌐" 
+                               FontSize="28" 
+                               VerticalOptions="Center"
+                               WidthRequest="40" />
+                    <Picker x:Name="PickerProtocolo"
+                                Title="Seleccionar Protocolo"
+                                FontSize="18"
+                                HorizontalOptions="FillAndExpand"
+                                BackgroundColor="{StaticResource Primary}"
+                                
+                                TextColor="{StaticResource BgCard}">
+                        <Picker.ItemsSource>
+                            <x:Array Type="{x:Type x:String}">
+                                <x:String>Java RESTful</x:String>
+                                <x:String>SOAP .NET</x:String>
+                            </x:Array>
+                        </Picker.ItemsSource>
+                        <Picker.SelectedIndex>0</Picker.SelectedIndex>
+                    </Picker>
+                </StackLayout>
+            </StackLayout>
+
+            <!-- Botón Login -->
+            <Button x:Name="ButtonLogin"
+                        Text="🔓 Iniciar Sesión"
+                        FontSize="18"
+                        FontAttributes="Bold"
+                        BackgroundColor="{StaticResource Primary}"
+                        TextColor="{StaticResource White}"
+                        HeightRequest="45"
+                        CornerRadius="8"
+                        Margin="0,20,0,0"
+                        Clicked="OnLoginClicked" />
+
+            <!-- Indicador de carga -->
+            <ActivityIndicator x:Name="LoadingIndicator"
+                                  IsVisible="False"
+                                  IsRunning="False"
+                                  Color="{StaticResource Primary}"
+                                  HeightRequest="40" />
+
+            <!-- Información adicional -->
+            <StackLayout Spacing="8" Margin="0,30,0,0" Opacity="0.7">
+                <Label Text="Credenciales por defecto:"
+                           FontSize="12"
+                           TextColor="{StaticResource TextSecondary}"
+                           HorizontalOptions="Center" />
+                <Label Text="Usuario: MONSTER | Contraseña: MONSTER9"
+                           FontSize="11"
+                           TextColor="{StaticResource TextSecondary}"
+                           HorizontalOptions="Center"
+                           FontAttributes="Italic" />
+            </StackLayout>
+
+        </StackLayout>
+    </ScrollView>
+
+</ContentPage>
