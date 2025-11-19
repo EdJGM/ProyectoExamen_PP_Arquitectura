@@ -1,0 +1,205 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<Application xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:ClienteMovil"
+             x:Class="ClienteMovil.App">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <!-- Importar colores personalizados -->
+                <ResourceDictionary Source="Resources/Styles/Colors.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <!-- ESTILOS GLOBALES (idénticos visualmente al escritorio) -->
+
+            <!-- Estilo base para páginas -->
+            <Style TargetType="ContentPage" ApplyToDerivedTypes="True">
+                <Setter Property="BackgroundColor" Value="{StaticResource BgPrimary}" />
+                <Setter Property="Shell.NavBarHasShadow" Value="True" />
+                <Setter Property="Shell.BackgroundColor" Value="{StaticResource BgHeader}" />
+                <Setter Property="Shell.ForegroundColor" Value="{StaticResource TextLight}" />
+                <Setter Property="Shell.TitleColor" Value="{StaticResource TextLight}" />
+            </Style>
+
+            <!-- Estilo para Entry (campos de texto) -->
+            <Style x:Key="StyledEntry" TargetType="Entry">
+                <Setter Property="BackgroundColor" Value="{StaticResource BgCard}" />
+                <Setter Property="TextColor" Value="{StaticResource TextPrimary}" />
+                <Setter Property="PlaceholderColor" Value="{StaticResource TextSecondary}" />
+                <Setter Property="FontSize" Value="14" />
+                <Setter Property="HeightRequest" Value="45" />
+            </Style>
+
+            <!-- Estilo para SearchBar -->
+            <Style TargetType="SearchBar">
+                <Setter Property="BackgroundColor" Value="{StaticResource BgSecondary}" />
+                <Setter Property="TextColor" Value="{StaticResource TextPrimary}" />
+                <Setter Property="PlaceholderColor" Value="{StaticResource TextSecondary}" />
+                <Setter Property="FontSize" Value="14" />
+            </Style>
+
+            <!-- Estilo para Frame de tarjetas -->
+            <Style x:Key="CardFrame" TargetType="Frame">
+                <Setter Property="BackgroundColor" Value="{StaticResource BgCard}" />
+                <Setter Property="CornerRadius" Value="12" />
+                <Setter Property="HasShadow" Value="True" />
+                <Setter Property="Padding" Value="16" />
+                <Setter Property="Margin" Value="0,4" />
+            </Style>
+
+            <!-- Estilos para Labels -->
+            <Style x:Key="TitleLabel" TargetType="Label">
+                <Setter Property="FontSize" Value="20" />
+                <Setter Property="FontAttributes" Value="Bold" />
+                <Setter Property="TextColor" Value="{StaticResource TextPrimary}" />
+                <Setter Property="HorizontalOptions" Value="Center" />
+            </Style>
+
+            <Style x:Key="SubtitleLabel" TargetType="Label">
+                <Setter Property="FontSize" Value="16" />
+                <Setter Property="FontAttributes" Value="Bold" />
+                <Setter Property="TextColor" Value="{StaticResource Primary}" />
+            </Style>
+
+            <Style x:Key="BodyLabel" TargetType="Label">
+                <Setter Property="FontSize" Value="14" />
+                <Setter Property="TextColor" Value="{StaticResource TextPrimary}" />
+            </Style>
+
+            <Style x:Key="CaptionLabel" TargetType="Label">
+                <Setter Property="FontSize" Value="12" />
+                <Setter Property="TextColor" Value="{StaticResource TextSecondary}" />
+            </Style>
+
+            <!-- Estilos para Botones -->
+            <Style x:Key="PrimaryButton" TargetType="Button">
+                <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
+                <Setter Property="TextColor" Value="White" />
+                <Setter Property="CornerRadius" Value="8" />
+                <Setter Property="FontSize" Value="14" />
+                <Setter Property="FontAttributes" Value="Bold" />
+                <Setter Property="HeightRequest" Value="45" />
+            </Style>
+
+            <Style x:Key="SuccessButton" TargetType="Button">
+                <Setter Property="BackgroundColor" Value="{StaticResource Success}" />
+                <Setter Property="TextColor" Value="White" />
+                <Setter Property="CornerRadius" Value="8" />
+                <Setter Property="FontSize" Value="14" />
+                <Setter Property="FontAttributes" Value="Bold" />
+                <Setter Property="HeightRequest" Value="45" />
+            </Style>
+
+            <Style x:Key="DangerButton" TargetType="Button">
+                <Setter Property="BackgroundColor" Value="{StaticResource Danger}" />
+                <Setter Property="TextColor" Value="White" />
+                <Setter Property="CornerRadius" Value="8" />
+                <Setter Property="FontSize" Value="14" />
+                <Setter Property="FontAttributes" Value="Bold" />
+                <Setter Property="HeightRequest" Value="45" />
+            </Style>
+
+            <Style x:Key="WarningButton" TargetType="Button">
+                <Setter Property="BackgroundColor" Value="{StaticResource Warning}" />
+                <Setter Property="TextColor" Value="White" />
+                <Setter Property="CornerRadius" Value="8" />
+                <Setter Property="FontSize" Value="14" />
+                <Setter Property="FontAttributes" Value="Bold" />
+                <Setter Property="HeightRequest" Value="45" />
+            </Style>
+
+            <Style x:Key="InfoButton" TargetType="Button">
+                <Setter Property="BackgroundColor" Value="{StaticResource Info}" />
+                <Setter Property="TextColor" Value="White" />
+                <Setter Property="CornerRadius" Value="8" />
+                <Setter Property="FontSize" Value="14" />
+                <Setter Property="FontAttributes" Value="Bold" />
+                <Setter Property="HeightRequest" Value="45" />
+            </Style>
+
+            <!-- Estilo para Picker -->
+            <Style TargetType="Picker">
+                <Setter Property="BackgroundColor" Value="{StaticResource BgSecondary}" />
+                <Setter Property="TextColor" Value="{StaticResource TextPrimary}" />
+                <Setter Property="TitleColor" Value="{StaticResource TextSecondary}" />
+                <Setter Property="FontSize" Value="14" />
+            </Style>
+
+            <!-- Estilo para Stepper -->
+            <Style TargetType="Stepper">
+                <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
+            </Style>
+
+            <!-- Estilo para Switch -->
+            <Style TargetType="Switch">
+                <Setter Property="OnColor" Value="{StaticResource Success}" />
+                <Setter Property="ThumbColor" Value="White" />
+            </Style>
+
+            <!-- Estilo para ProgressBar -->
+            <Style TargetType="ProgressBar">
+                <Setter Property="ProgressColor" Value="{StaticResource Primary}" />
+                <Setter Property="BackgroundColor" Value="{StaticResource LightGray}" />
+            </Style>
+
+            <!-- Estilo para ActivityIndicator -->
+            <Style TargetType="ActivityIndicator">
+                <Setter Property="Color" Value="{StaticResource Primary}" />
+            </Style>
+
+            <!-- Estilo para CollectionView -->
+            <Style TargetType="CollectionView">
+                <Setter Property="BackgroundColor" Value="Transparent" />
+            </Style>
+
+            <!-- Estilo para ListView -->
+            <Style TargetType="ListView">
+                <Setter Property="BackgroundColor" Value="Transparent" />
+                <Setter Property="SeparatorColor" Value="{StaticResource BorderColor}" />
+            </Style>
+
+            <!-- Estilos para controles específicos del proyecto -->
+            <Style x:Key="ProductCard" TargetType="Frame">
+                <Setter Property="BackgroundColor" Value="{StaticResource BgCard}" />
+                <Setter Property="CornerRadius" Value="12" />
+                <Setter Property="HasShadow" Value="True" />
+                <Setter Property="Padding" Value="16" />
+                <Setter Property="Margin" Value="4" />
+            </Style>
+
+            <Style x:Key="StatusIndicator" TargetType="Label">
+                <Setter Property="FontSize" Value="12" />
+                <Setter Property="FontAttributes" Value="Bold" />
+                <Setter Property="HorizontalTextAlignment" Value="Center" />
+                <Setter Property="VerticalTextAlignment" Value="Center" />
+            </Style>
+
+            <!-- Estilos para bordes y separadores -->
+            <Style x:Key="Separator" TargetType="BoxView">
+                <Setter Property="Color" Value="{StaticResource BorderColor}" />
+                <Setter Property="HeightRequest" Value="1" />
+                <Setter Property="HorizontalOptions" Value="FillAndExpand" />
+                <Setter Property="Margin" Value="0,8" />
+            </Style>
+
+            <!-- CONVERTIDORES INLINE PARA BINDING -->
+            <x:String x:Key="TrueText">✅</x:String>
+            <x:String x:Key="FalseText">❌</x:String>
+
+            <!-- RECURSOS ADICIONALES -->
+            <x:Double x:Key="SmallSpacing">4</x:Double>
+            <x:Double x:Key="MediumSpacing">8</x:Double>
+            <x:Double x:Key="LargeSpacing">16</x:Double>
+            <x:Double x:Key="ExtraLargeSpacing">24</x:Double>
+
+            <x:Double x:Key="SmallCornerRadius">4</x:Double>
+            <x:Double x:Key="MediumCornerRadius">8</x:Double>
+            <x:Double x:Key="LargeCornerRadius">12</x:Double>
+
+            <x:Double x:Key="ButtonHeight">45</x:Double>
+            <x:Double x:Key="InputHeight">45</x:Double>
+            <x:Double x:Key="HeaderHeight">60</x:Double>
+
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

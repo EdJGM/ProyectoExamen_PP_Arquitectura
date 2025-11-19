@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell
+    x:Class="ClienteMovil.AppShell"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:local="clr-namespace:ClienteMovil"
+    xmlns:views="clr-namespace:ClienteMovil.Views"
+    Title="ESPE Comercializadora"
+    Shell.FlyoutBehavior="Flyout">
+
+    <!-- Configuración del Flyout (menú lateral) -->
+    <Shell.FlyoutHeader>
+        <Grid BackgroundColor="{StaticResource Primary}" 
+              HeightRequest="200">
+            <StackLayout Padding="20" 
+                        VerticalOptions="Center"
+                        HorizontalOptions="Center">
+                <!-- Logo ESPE -->
+                <Label Text="🏛️" 
+                       FontSize="48"
+                       HorizontalOptions="Center"
+                       TextColor="White" />
+                <!-- Título -->
+                <Label Text="ESPE" 
+                       FontSize="24"
+                       FontAttributes="Bold"
+                       HorizontalOptions="Center"
+                       TextColor="White" />
+                <Label Text="Comercializadora Electrodomésticos" 
+                       FontSize="12"
+                       HorizontalOptions="Center"
+                       TextColor="White"
+                       Opacity="0.8" />
+                <!-- Protocolo actual -->
+                <Frame BackgroundColor="White"
+                       CornerRadius="15"
+                       Padding="8,4"
+                       HasShadow="False"
+                       Margin="0,10,0,0">
+                    <Label x:Name="ProtocolLabel"
+                           Text="REST"
+                           FontSize="10"
+                           FontAttributes="Bold"
+                           TextColor="{StaticResource Primary}"
+                           HorizontalOptions="Center" />
+                </Frame>
+            </StackLayout>
+        </Grid>
+    </Shell.FlyoutHeader>
+
+    <Shell.FlyoutFooter>
+        <StackLayout Padding="20,10">
+            <Label Text="v1.0.0"
+                   FontSize="10"
+                   TextColor="Gray"
+                   HorizontalOptions="Center" />
+            <Label Text="Escuela Politécnica Nacional del Ejército"
+                   FontSize="9"
+                   TextColor="Gray"
+                   HorizontalOptions="Center" />
+        </StackLayout>
+    </Shell.FlyoutFooter>
+
+    <!-- Elementos de navegación (idénticos a los panels del escritorio) -->
+
+    <!-- Productos (equivalente a ProductosPanel) -->
+    <FlyoutItem Title="Productos" 
+                Icon="📦"
+                Route="productos">
+        <ShellContent ContentTemplate="{DataTemplate views:ProductosPage}" />
+    </FlyoutItem>
+
+    <!-- Facturación (equivalente a FacturacionPanel) -->
+    <FlyoutItem Title="Facturación" 
+                Icon="🧾"
+                Route="facturacion">
+        <ShellContent ContentTemplate="{DataTemplate views:FacturacionPage}" />
+    </FlyoutItem>
+
+    <!-- Crédito (equivalente a CreditoPanel) -->
+    <FlyoutItem Title="Crédito BanQuito" 
+                Icon="💳"
+                Route="credito">
+        <ShellContent ContentTemplate="{DataTemplate views:CreditoPage}" />
+    </FlyoutItem>
+
+    <!-- Conectividad (equivalente a ConectividadPanel) -->
+    <FlyoutItem Title="Conectividad" 
+                Icon="⚙️"
+                Route="conectividad">
+        <ShellContent ContentTemplate="{DataTemplate views:ConectividadPage}" />
+    </FlyoutItem>
+
+    <!-- Separador visual -->
+    <MenuItem Text="──────────────────" 
+              IsEnabled="False" />
+
+    <!-- Opciones de protocolo -->
+    <MenuItem Text="🔄 Cambiar a REST"
+              x:Name="MenuRest"
+              Clicked="OnCambiarRestClicked" />
+
+    <MenuItem Text="🔄 Cambiar a SOAP"
+              x:Name="MenuSoap"
+              Clicked="OnCambiarSoapClicked" />
+
+</Shell>

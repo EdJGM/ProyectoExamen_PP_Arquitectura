@@ -1,0 +1,78 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<?xaml-comp compile="true" ?>
+<ResourceDictionary 
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+
+    <!-- COLORES ESPE (idénticos al cliente de escritorio) -->
+
+    <!-- Colores Principales -->
+    <Color x:Key="Primary">#2980B9</Color>
+    <!-- Azul ESPE -->
+    <Color x:Key="PrimaryDark">#1F618D</Color>
+    <!-- Azul oscuro -->
+    <Color x:Key="PrimaryLight">#AED6F1</Color>
+    <!-- Azul claro -->
+
+    <Color x:Key="Secondary">#E74C3C</Color>
+    <!-- Rojo ESPE -->
+    <Color x:Key="SecondaryDark">#C0392B</Color>
+    <!-- Rojo oscuro -->
+    <Color x:Key="SecondaryLight">#F5B7B1</Color>
+    <!-- Rojo claro -->
+
+    <!-- Colores de Estado -->
+    <Color x:Key="Success">#27AE60</Color>
+    <!-- Verde éxito -->
+    <Color x:Key="Warning">#F1C40F</Color>
+    <!-- Amarillo advertencia -->
+    <Color x:Key="Danger">#E74C3C</Color>
+    <!-- Rojo peligro -->
+    <Color x:Key="Info">#3498DB</Color>
+    <!-- Azul información -->
+
+    <!-- Colores Neutrales -->
+    <Color x:Key="White">White</Color>
+    <Color x:Key="LightGray">#F8F9FA</Color>
+    <Color x:Key="MediumGray">#6C757D</Color>
+    <Color x:Key="DarkGray">#343A40</Color>
+    <Color x:Key="Black">#212529</Color>
+
+    <!-- Colores de Fondo -->
+    <Color x:Key="BgPrimary">#F8F9FA</Color>
+    <!-- Fondo principal -->
+    <Color x:Key="BgSecondary">#E9ECEF</Color>
+    <!-- Fondo secundario -->
+    <Color x:Key="BgCard">White</Color>
+    <!-- Fondo de tarjetas -->
+    <Color x:Key="BgHeader">#2980B9</Color>
+    <!-- Fondo de header -->
+    <Color x:Key="BgSidebar">#495057</Color>
+    <!-- Fondo de sidebar -->
+
+    <!-- Colores de Texto -->
+    <Color x:Key="TextPrimary">#212529</Color>
+    <!-- Texto principal -->
+    <Color x:Key="TextSecondary">#6C757D</Color>
+    <!-- Texto secundario -->
+    <Color x:Key="TextLight">White</Color>
+    <!-- Texto claro -->
+
+    <!-- Colores de Bordes -->
+    <Color x:Key="BorderColor">#DEE2E6</Color>
+    <Color x:Key="BorderFocus">#2980B9</Color>
+
+    <!-- Colores por Categoría/Protocolo -->
+    <Color x:Key="ColorTemperatura">#E74C3C</Color>
+    <!-- REST/Rojo -->
+    <Color x:Key="ColorLongitud">#3498DB</Color>
+    <!-- Info/Azul -->
+    <Color x:Key="ColorMasa">#27AE60</Color>
+    <!-- Success/Verde -->
+    <Color x:Key="ColorLogin">#8B5CF6</Color>
+    <!-- Login/Morado -->
+
+    <!-- Transparencias -->
+    <Color x:Key="BlackTransparent">#80000000</Color>
+    <Color x:Key="WhiteTransparent">#80FFFFFF</Color>
+</ResourceDictionary>

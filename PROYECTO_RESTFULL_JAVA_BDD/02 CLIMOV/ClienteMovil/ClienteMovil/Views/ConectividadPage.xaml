@@ -1,0 +1,280 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="ClienteMovil.Views.ConectividadPage"
+             Title="⚙️ Conectividad"
+             BackgroundColor="{StaticResource BgPrimary}">
+
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="🧹" 
+                     Clicked="OnLimpiarLogClicked"
+                     Order="Primary" />
+    </ContentPage.ToolbarItems>
+
+    <ScrollView>
+        <StackLayout Padding="16" Spacing="16">
+
+            <!-- ESTADO DEL PROTOCOLO ACTUAL -->
+            <Frame BackgroundColor="{StaticResource BgCard}"
+                   CornerRadius="12"
+                   HasShadow="True"
+                   Padding="16">
+                <StackLayout Spacing="12">
+                    <Label Text="🔧 Configuración de Protocolo"
+                           FontSize="16"
+                           FontAttributes="Bold"
+                           TextColor="{StaticResource Primary}" />
+
+                    <!-- Protocolo actual -->
+                    <Label x:Name="LabelProtocoloActual"
+                           Text="🔧 Protocolo: REST (Java)"
+                           FontSize="14"
+                           FontAttributes="Bold"
+                           TextColor="{StaticResource Primary}" />
+
+                    <!-- Botones de cambio de protocolo -->
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <Button x:Name="ButtonCambiarRest"
+                                Grid.Column="0"
+                                Text="✅ REST (Activo)"
+                                BackgroundColor="{StaticResource Success}"
+                                TextColor="White"
+                                CornerRadius="8"
+                                HeightRequest="45"
+                                FontSize="12"
+                                Margin="0,0,4,0"
+                                CommandParameter="REST"
+                                Clicked="OnCambiarProtocoloClicked" />
+
+                        <Button x:Name="ButtonCambiarSoap"
+                                Grid.Column="1"
+                                Text="🔄 Cambiar a SOAP"
+                                BackgroundColor="{StaticResource MediumGray}"
+                                TextColor="White"
+                                CornerRadius="8"
+                                HeightRequest="45"
+                                FontSize="12"
+                                Margin="4,0,0,0"
+                                CommandParameter="SOAP"
+                                Clicked="OnCambiarProtocoloClicked" />
+                    </Grid>
+                </StackLayout>
+            </Frame>
+
+            <!-- ESTADO DE LOS SERVICIOS -->
+            <Frame BackgroundColor="{StaticResource BgCard}"
+                   CornerRadius="12"
+                   HasShadow="True"
+                   Padding="16">
+                <StackLayout Spacing="16">
+                    <Label Text="📊 Estado de Servicios"
+                           FontSize="16"
+                           FontAttributes="Bold"
+                           TextColor="{StaticResource Primary}" />
+
+                    <!-- Progress bar para pruebas -->
+                    <ProgressBar x:Name="ProgressBar"
+                            ProgressColor="{StaticResource Primary}"
+                            Progress="0"
+                            IsVisible="False"
+                            HeightRequest="4" />
+
+                    <!-- Estados individuales -->
+                    <StackLayout Spacing="12">
+                        <!-- Comercializadora -->
+                        <Label x:Name="LabelEstadoComercializadora"
+                               Text="⚪ Comercializadora: Sin probar"
+                               FontSize="14"
+                               TextColor="{StaticResource TextSecondary}" />
+
+                        <!-- BanQuito -->
+                        <Label x:Name="LabelEstadoBanquito"
+                               Text="⚪ BanQuito: Sin probar"
+                               FontSize="14"
+                               TextColor="{StaticResource TextSecondary}" />
+
+                        <!-- Estado general -->
+                        <BoxView Color="{StaticResource BorderColor}"
+                                 HeightRequest="1"
+                                 Margin="0,8" />
+
+                        <Label x:Name="LabelEstadoGeneral"
+                               Text="🔄 Esperando pruebas de conectividad"
+                               FontSize="14"
+                               FontAttributes="Bold"
+                               TextColor="{StaticResource TextPrimary}" />
+                    </StackLayout>
+
+                    <!-- Botón probar conexiones -->
+                    <Button Text="🔍 Probar Conexiones"
+                            BackgroundColor="{StaticResource Primary}"
+                            TextColor="White"
+                            CornerRadius="8"
+                            HeightRequest="50"
+                            FontSize="16"
+                            FontAttributes="Bold"
+                            Clicked="OnProbarConexionesClicked" />
+                </StackLayout>
+            </Frame>
+
+            <!-- CONFIGURACIÓN DE ACTUALIZACIÓN -->
+            <Frame BackgroundColor="{StaticResource BgCard}"
+                   CornerRadius="12"
+                   HasShadow="True"
+                   Padding="16">
+                <StackLayout Spacing="12">
+                    <Label Text="🔄 Configuración de Actualización"
+                           FontSize="16"
+                           FontAttributes="Bold"
+                           TextColor="{StaticResource Primary}" />
+
+                    <StackLayout Orientation="Horizontal" Spacing="16">
+                        <Label Text="Actualización automática:"
+                               FontSize="14"
+                               TextColor="{StaticResource TextPrimary}"
+                               VerticalOptions="Center" />
+                        <Switch x:Name="SwitchActualizacionAutomatica"
+                               IsToggled="True"
+                               OnColor="{StaticResource Success}"
+                               ThumbColor="White"
+                               Toggled="OnSwitchActualizacionChanged" />
+                    </StackLayout>
+
+                    <Label Text="• La actualización automática verifica el estado cada 30 segundos"
+                           FontSize="12"
+                           TextColor="{StaticResource TextSecondary}" />
+                    <Label Text="• Puede deshabilitarla para realizar pruebas manuales"
+                           FontSize="12"
+                           TextColor="{StaticResource TextSecondary}" />
+                </StackLayout>
+            </Frame>
+
+            <!-- LOG DE CONEXIONES -->
+            <Frame BackgroundColor="{StaticResource BgCard}"
+                   CornerRadius="12"
+                   HasShadow="True"
+                   Padding="16">
+                <StackLayout Spacing="16">
+                    <StackLayout Orientation="Horizontal" Spacing="16">
+                        <Label Text="📝 Log de Conexiones"
+                               FontSize="16"
+                               FontAttributes="Bold"
+                               TextColor="{StaticResource Primary}"
+                               VerticalOptions="Center"
+                               HorizontalOptions="StartAndExpand" />
+                        <Button Text="🧹"
+                                BackgroundColor="{StaticResource Warning}"
+                                TextColor="White"
+                                CornerRadius="6"
+                                WidthRequest="40"
+                                HeightRequest="30"
+                                FontSize="12"
+                                Clicked="OnLimpiarLogClicked" />
+                    </StackLayout>
+
+                    <!-- Lista de logs -->
+                    <Frame BackgroundColor="{StaticResource BgSecondary}"
+                           CornerRadius="8"
+                           Padding="12"
+                           HasShadow="False">
+                        <CollectionView x:Name="LogCollectionView"
+                                       MaximumHeightRequest="300">
+                            <CollectionView.EmptyView>
+                                <StackLayout HorizontalOptions="Center" 
+                                            VerticalOptions="Center"
+                                            Spacing="8">
+                                    <Label Text="📝"
+                                           FontSize="32"
+                                           HorizontalOptions="Center"
+                                           TextColor="{StaticResource TextSecondary}" />
+                                    <Label Text="No hay registros en el log"
+                                           FontSize="14"
+                                           HorizontalOptions="Center"
+                                           TextColor="{StaticResource TextSecondary}" />
+                                </StackLayout>
+                            </CollectionView.EmptyView>
+
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Padding="4,2">
+                                        <Label Text="{Binding .}"
+                                               FontSize="11"
+                                               FontFamily="Courier"
+                                               TextColor="{StaticResource TextSecondary}"
+                                               LineBreakMode="WordWrap" />
+                                    </Grid>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
+                    </Frame>
+                </StackLayout>
+            </Frame>
+
+            <!-- INFORMACIÓN TÉCNICA -->
+            <Frame BackgroundColor="{StaticResource BgCard}"
+                   CornerRadius="12"
+                   HasShadow="True"
+                   Padding="16">
+                <StackLayout Spacing="12">
+                    <Label Text="ℹ️ Información Técnica"
+                           FontSize="16"
+                           FontAttributes="Bold"
+                           TextColor="{StaticResource Primary}" />
+
+                    <StackLayout Spacing="4">
+                        <Label Text="🔗 Endpoints REST (Java):"
+                               FontSize="12"
+                               FontAttributes="Bold"
+                               TextColor="{StaticResource TextPrimary}" />
+                        <Label Text="• Comercializadora: http://localhost:8080/ComercializadoraElectrodomesticos/api"
+                               FontSize="11"
+                               TextColor="{StaticResource TextSecondary}"
+                               FontFamily="Courier" />
+                        <Label Text="• BanQuito: http://localhost:8080/BanquitoCore/api/credito"
+                               FontSize="11"
+                               TextColor="{StaticResource TextSecondary}"
+                               FontFamily="Courier" />
+                    </StackLayout>
+
+                    <StackLayout Spacing="4">
+                        <Label Text="🔗 Endpoints SOAP (.NET):"
+                               FontSize="12"
+                               FontAttributes="Bold"
+                               TextColor="{StaticResource TextPrimary}" />
+                        <Label Text="• Comercializadora: http://localhost:5000/ElectrodomesticosService.asmx"
+                               FontSize="11"
+                               TextColor="{StaticResource TextSecondary}"
+                               FontFamily="Courier" />
+                        <Label Text="• BanQuito: http://localhost:5001/CreditoService.asmx"
+                               FontSize="11"
+                               TextColor="{StaticResource TextSecondary}"
+                               FontFamily="Courier" />
+                    </StackLayout>
+
+                    <Frame BackgroundColor="{StaticResource BgSecondary}"
+                           CornerRadius="6"
+                           Padding="8"
+                           HasShadow="False">
+                        <StackLayout Spacing="2">
+                            <Label Text="⚠️ Nota Importante"
+                                   FontSize="11"
+                                   FontAttributes="Bold"
+                                   TextColor="{StaticResource Warning}" />
+                            <Label Text="Los servicios SOAP (.NET) están en desarrollo. Actualmente solo están disponibles los servicios REST (Java)."
+                                   FontSize="10"
+                                   TextColor="{StaticResource TextSecondary}"
+                                   LineBreakMode="WordWrap" />
+                        </StackLayout>
+                    </Frame>
+                </StackLayout>
+            </Frame>
+
+        </StackLayout>
+    </ScrollView>
+
+</ContentPage>

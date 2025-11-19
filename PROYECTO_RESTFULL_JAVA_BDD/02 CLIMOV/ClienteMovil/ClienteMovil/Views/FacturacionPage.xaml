@@ -1,0 +1,390 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="ClienteMovil.Views.FacturacionPage"
+             Title="🧾 Facturación"
+             BackgroundColor="{StaticResource BgPrimary}">
+
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="🔄" 
+                     Clicked="OnCargarProductosClicked"
+                     Order="Primary" />
+        <ToolbarItem Text="🧹" 
+                     Clicked="OnLimpiarFormularioClicked"
+                     Order="Secondary" />
+    </ContentPage.ToolbarItems>
+
+    <ScrollView>
+        <StackLayout Padding="16" Spacing="16">
+
+            <!-- Indicador de estado general -->
+            <Frame BackgroundColor="{StaticResource BgCard}"
+                   CornerRadius="12"
+                   HasShadow="True"
+                   Padding="16">
+                <StackLayout Orientation="Horizontal" Spacing="16">
+                    <ActivityIndicator x:Name="LoadingIndicator"
+                                      IsVisible="False"
+                                      IsRunning="False"
+                                      Color="{StaticResource Primary}"
+                                      WidthRequest="20"
+                                      HeightRequest="20" />
+                    <Label x:Name="StatusLabel"
+                           Text="Sistema listo"
+                           FontSize="14"
+                           TextColor="{StaticResource TextPrimary}"
+                           VerticalOptions="Center" />
+                </StackLayout>
+            </Frame>
+
+            <!-- DATOS DEL CLIENTE -->
+            <Frame BackgroundColor="{StaticResource BgCard}"
+                   CornerRadius="12"
+                   HasShadow="True"
+                   Padding="16">
+                <StackLayout Spacing="16">
+                    <Label Text="👤 Datos del Cliente"
+                           FontSize="16"
+                           FontAttributes="Bold"
+                           TextColor="{StaticResource Primary}" />
+
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Cédula -->
+                        <Entry x:Name="EntryCliente"
+                               Grid.Row="0" Grid.Column="0"
+                               Placeholder="Ingrese la cédula del cliente"
+                               BackgroundColor="{StaticResource BgSecondary}"
+                               TextColor="{StaticResource TextPrimary}"
+                               PlaceholderColor="{StaticResource TextSecondary}"
+                               Keyboard="Numeric"
+                               MaxLength="10"
+                               HeightRequest="45" />
+
+                        <Button Grid.Row="0" Grid.Column="1"
+                                Text="✅"
+                                BackgroundColor="{StaticResource Primary}"
+                                TextColor="White"
+                                CornerRadius="8"
+                                WidthRequest="60"
+                                HeightRequest="45"
+                                Margin="8,0,0,0"
+                                Clicked="OnValidarClienteClicked" />
+
+                        <!-- Resultado validación cliente -->
+                        <Label x:Name="LabelNombreCliente"
+                               Grid.Row="1" Grid.ColumnSpan="2"
+                               Text="Cliente no validado"
+                               FontSize="14"
+                               TextColor="{StaticResource MediumGray}"
+                               Margin="0,8,0,0" />
+                    </Grid>
+                </StackLayout>
+            </Frame>
+
+            <!-- SELECCIÓN DE PRODUCTOS -->
+            <Frame BackgroundColor="{StaticResource BgCard}"
+                   CornerRadius="12"
+                   HasShadow="True"
+                   Padding="16">
+                <StackLayout Spacing="16">
+                    <Label Text="🛒 Selección de Productos"
+                           FontSize="16"
+                           FontAttributes="Bold"
+                           TextColor="{StaticResource Primary}" />
+
+                    <!-- Selector de producto -->
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <!-- Picker de productos -->
+                        <Picker x:Name="PickerProductos"
+                                Grid.Row="0"
+                                Title="Seleccione un producto"
+                                BackgroundColor="{StaticResource BgSecondary}"
+                                TextColor="{StaticResource TextPrimary}"
+                                TitleColor="{StaticResource TextSecondary}" />
+
+                        <!-- Cantidad -->
+                        <StackLayout Grid.Row="1" 
+                                   Orientation="Horizontal" 
+                                   Spacing="16"
+                                   Margin="0,16,0,0">
+                            <Label Text="Cantidad:"
+                                   FontSize="14"
+                                   TextColor="{StaticResource TextPrimary}"
+                                   VerticalOptions="Center" />
+                            <Stepper x:Name="StepperCantidad"
+                                    Minimum="1"
+                                    Maximum="999"
+                                    Value="1"
+                                    Increment="1" />
+                            <Label Text="{Binding Source={x:Reference StepperCantidad}, Path=Value}"
+                                   FontSize="14"
+                                   FontAttributes="Bold"
+                                   TextColor="{StaticResource Primary}"
+                                   VerticalOptions="Center" />
+                        </StackLayout>
+
+                        <!-- Botón agregar -->
+                        <Button Grid.Row="2"
+                                Text="➕ Agregar al Carrito"
+                                BackgroundColor="{StaticResource Success}"
+                                TextColor="White"
+                                CornerRadius="8"
+                                HeightRequest="45"
+                                Margin="0,16,0,0"
+                                Clicked="OnAgregarItemClicked" />
+                    </Grid>
+                </StackLayout>
+            </Frame>
+
+            <!-- CARRITO DE COMPRAS -->
+            <Frame BackgroundColor="{StaticResource BgCard}"
+                   CornerRadius="12"
+                   HasShadow="True"
+                   Padding="16">
+                <StackLayout Spacing="16">
+                    <Label Text="🛍️ Carrito de Compras"
+                           FontSize="16"
+                           FontAttributes="Bold"
+                           TextColor="{StaticResource Primary}" />
+
+                    <!-- Lista de items -->
+                    <CollectionView x:Name="ItemsCollectionView">
+                        <CollectionView.EmptyView>
+                            <StackLayout HorizontalOptions="Center" 
+                                        VerticalOptions="Center"
+                                        Spacing="8">
+                                <Label Text="🛒"
+                                       FontSize="32"
+                                       HorizontalOptions="Center"
+                                       TextColor="{StaticResource TextSecondary}" />
+                                <Label Text="El carrito está vacío"
+                                       FontSize="14"
+                                       HorizontalOptions="Center"
+                                       TextColor="{StaticResource TextSecondary}" />
+                            </StackLayout>
+                        </CollectionView.EmptyView>
+
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Padding="0,4">
+                                    <Frame BackgroundColor="{StaticResource BgSecondary}"
+                                           CornerRadius="8"
+                                           Padding="12"
+                                           Margin="2">
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                            </Grid.RowDefinitions>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+
+                                            <!-- Producto -->
+                                            <Label Grid.Row="0" Grid.Column="0"
+                                                   Text="{Binding Producto.NombreCompleto}"
+                                                   FontSize="14"
+                                                   FontAttributes="Bold"
+                                                   TextColor="{StaticResource TextPrimary}" />
+
+                                            <!-- Cantidad y precio -->
+                                            <Label Grid.Row="1" Grid.Column="0"
+                                                   Text="{Binding Cantidad, StringFormat='Cantidad: {0}'}"
+                                                   FontSize="12"
+                                                   TextColor="{StaticResource TextSecondary}" />
+
+                                            <!-- Subtotal -->
+                                            <Label Grid.Row="0" Grid.Column="1"
+                                                   Text="{Binding Subtotal, StringFormat='${0:F2}'}"
+                                                   FontSize="14"
+                                                   FontAttributes="Bold"
+                                                   TextColor="{StaticResource Primary}"
+                                                   VerticalOptions="Center" />
+
+                                            <!-- Botón eliminar -->
+                                            <Button Grid.Row="0" Grid.Column="2" Grid.RowSpan="2"
+                                                    Text="🗑️"
+                                                    BackgroundColor="{StaticResource Danger}"
+                                                    TextColor="White"
+                                                    CornerRadius="6"
+                                                    WidthRequest="40"
+                                                    HeightRequest="40"
+                                                    Margin="8,0,0,0"
+                                                    Clicked="OnRemoverItemClicked" />
+                                        </Grid>
+                                    </Frame>
+                                </Grid>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </StackLayout>
+            </Frame>
+
+            <!-- RESUMEN DE TOTALES -->
+            <Frame BackgroundColor="{StaticResource BgCard}"
+                   CornerRadius="12"
+                   HasShadow="True"
+                   Padding="16">
+                <StackLayout Spacing="12">
+                    <Label Text="📊 Resumen de Totales"
+                           FontSize="16"
+                           FontAttributes="Bold"
+                           TextColor="{StaticResource Primary}" />
+
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Subtotal -->
+                        <Label Grid.Row="0" Grid.Column="0"
+                               Text="Subtotal:"
+                               FontSize="14"
+                               TextColor="{StaticResource TextSecondary}" />
+                        <Label Grid.Row="0" Grid.Column="1"
+                               x:Name="LabelSubtotal"
+                               Text="$0.00"
+                               FontSize="14"
+                               FontAttributes="Bold"
+                               TextColor="{StaticResource TextPrimary}" />
+
+                        <!-- Descuento (solo efectivo) -->
+                        <Label Grid.Row="1" Grid.Column="0"
+                               Text="Descuento (33%):"
+                               FontSize="14"
+                               TextColor="{StaticResource Success}" />
+                        <Label Grid.Row="1" Grid.Column="1"
+                               x:Name="LabelDescuento"
+                               Text="$0.00"
+                               FontSize="14"
+                               FontAttributes="Bold"
+                               TextColor="{StaticResource Success}" />
+
+                        <!-- Separador -->
+                        <BoxView Grid.Row="2" Grid.ColumnSpan="2"
+                                 Color="{StaticResource BorderColor}"
+                                 HeightRequest="1"
+                                 Margin="0,8" />
+
+                        <!-- Total -->
+                        <Label Grid.Row="3" Grid.Column="0"
+                               Text="TOTAL:"
+                               FontSize="16"
+                               FontAttributes="Bold"
+                               TextColor="{StaticResource Primary}" />
+                        <Label Grid.Row="3" Grid.Column="1"
+                               x:Name="LabelTotal"
+                               Text="$0.00"
+                               FontSize="16"
+                               FontAttributes="Bold"
+                               TextColor="{StaticResource Primary}" />
+                    </Grid>
+                </StackLayout>
+            </Frame>
+
+            <!-- FACTURACIÓN -->
+            <Frame BackgroundColor="{StaticResource BgCard}"
+                   CornerRadius="12"
+                   HasShadow="True"
+                   Padding="16">
+                <StackLayout Spacing="16">
+                    <Label Text="💳 Opciones de Pago"
+                           FontSize="16"
+                           FontAttributes="Bold"
+                           TextColor="{StaticResource Primary}" />
+
+                    <!-- Venta en efectivo -->
+                    <Button x:Name="ButtonVentaEfectivo"
+                            Text="💵 Venta en Efectivo (33% DESC)"
+                            BackgroundColor="{StaticResource Success}"
+                            TextColor="White"
+                            CornerRadius="8"
+                            HeightRequest="50"
+                            FontSize="16"
+                            FontAttributes="Bold"
+                            Clicked="OnVentaEfectivoClicked"
+                            IsEnabled="False" />
+
+                    <!-- Configuración de crédito -->
+                    <StackLayout Spacing="12">
+                        <StackLayout Orientation="Horizontal" Spacing="16">
+                            <Label Text="Cuotas:"
+                                   FontSize="14"
+                                   TextColor="{StaticResource TextPrimary}"
+                                   VerticalOptions="Center" />
+                            <Stepper x:Name="StepperCuotas"
+                                    Minimum="3"
+                                    Maximum="24"
+                                    Value="3"
+                                    Increment="1" />
+                            <Label Text="{Binding Source={x:Reference StepperCuotas}, Path=Value, StringFormat='{0} meses'}"
+                                   FontSize="14"
+                                   FontAttributes="Bold"
+                                   TextColor="{StaticResource Primary}"
+                                   VerticalOptions="Center" />
+                        </StackLayout>
+
+                        <!-- Venta a crédito -->
+                        <Button x:Name="ButtonVentaCredito"
+                                Text="🏦 Venta a Crédito BanQuito"
+                                BackgroundColor="{StaticResource Info}"
+                                TextColor="White"
+                                CornerRadius="8"
+                                HeightRequest="50"
+                                FontSize="16"
+                                FontAttributes="Bold"
+                                Clicked="OnVentaCreditoClicked"
+                                IsEnabled="False" />
+                    </StackLayout>
+
+                    <!-- Información importante -->
+                    <Frame BackgroundColor="{StaticResource BgSecondary}"
+                           CornerRadius="8"
+                           Padding="12">
+                        <StackLayout Spacing="4">
+                            <Label Text="ℹ️ Información Importante"
+                                   FontSize="12"
+                                   FontAttributes="Bold"
+                                   TextColor="{StaticResource Primary}" />
+                            <Label Text="• Venta en efectivo: 33% de descuento aplicado"
+                                   FontSize="11"
+                                   TextColor="{StaticResource TextSecondary}" />
+                            <Label Text="• Venta a crédito: Requiere validación del cliente"
+                                   FontSize="11"
+                                   TextColor="{StaticResource TextSecondary}" />
+                            <Label Text="• Tasa de interés: 16% anual"
+                                   FontSize="11"
+                                   TextColor="{StaticResource TextSecondary}" />
+                        </StackLayout>
+                    </Frame>
+                </StackLayout>
+            </Frame>
+
+        </StackLayout>
+    </ScrollView>
+
+</ContentPage>

@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="ClienteMovil.Views.ProductosPage"
+             Title="📦 Productos"
+             BackgroundColor="{StaticResource BgPrimary}">
+
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="➕" 
+                     Clicked="OnAgregarProductoClicked"
+                     Order="Primary" />
+        <ToolbarItem Text="🔄" 
+                     Clicked="OnRefreshClicked"
+                     Order="Primary" />
+    </ContentPage.ToolbarItems>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Header con búsqueda -->
+        <Frame Grid.Row="0" 
+               BackgroundColor="{StaticResource BgCard}"
+               CornerRadius="12"
+               Margin="16,16,16,8"
+               HasShadow="True">
+            <StackLayout>
+                <!-- Título -->
+                <Label Text="📦 Gestión de Electrodomésticos"
+                       FontSize="18"
+                       FontAttributes="Bold"
+                       TextColor="{StaticResource TextPrimary}"
+                       HorizontalOptions="Center"
+                       Margin="0,0,0,16" />
+
+                <!-- Campo de búsqueda -->
+                <SearchBar x:Name="SearchBar"
+                          Placeholder="🔍 Buscar productos..."
+                          BackgroundColor="{StaticResource BgSecondary}"
+                          TextColor="{StaticResource TextPrimary}"
+                          PlaceholderColor="{StaticResource TextSecondary}" />
+
+                <!-- Contador de productos -->
+                <Label x:Name="ContadorLabel"
+                       Text="📦 0 productos encontrados"
+                       FontSize="12"
+                       TextColor="{StaticResource TextSecondary}"
+                       HorizontalOptions="Center"
+                       Margin="0,8,0,0" />
+            </StackLayout>
+        </Frame>
+
+        <!-- Lista de productos -->
+        <Grid Grid.Row="1" Margin="16,8">
+            <!-- Indicador de carga -->
+            <StackLayout x:Name="LoadingSection" 
+                        VerticalOptions="Center"
+                        HorizontalOptions="Center">
+                <ActivityIndicator x:Name="LoadingIndicator"
+                                  IsVisible="False"
+                                  IsRunning="False"
+                                  Color="{StaticResource Primary}"
+                                  WidthRequest="50"
+                                  HeightRequest="50" />
+                <Label Text="Cargando productos..."
+                       FontSize="16"
+                       TextColor="{StaticResource TextSecondary}"
+                       HorizontalOptions="Center"
+                       Margin="0,16,0,0" />
+            </StackLayout>
+
+            <!-- CollectionView de productos -->
+            <CollectionView x:Name="ProductosCollectionView"
+                           SelectionMode="Single"
+                           SelectionChanged="OnProductoSeleccionado">
+
+                <!-- Vista cuando no hay productos -->
+                <CollectionView.EmptyView>
+                    <StackLayout VerticalOptions="Center"
+                                HorizontalOptions="Center"
+                                Spacing="16">
+                        <Label Text="📦"
+                               FontSize="48"
+                               HorizontalOptions="Center"
+                               TextColor="{StaticResource TextSecondary}" />
+                        <Label Text="No hay productos disponibles"
+                               FontSize="16"
+                               FontAttributes="Bold"
+                               HorizontalOptions="Center"
+                               TextColor="{StaticResource TextSecondary}" />
+                        <Button Text="🔄 Cargar Productos"
+                                Clicked="OnRefreshClicked"
+                                BackgroundColor="{StaticResource Primary}"
+                                TextColor="White"
+                                CornerRadius="8"
+                                Margin="0,16,0,0" />
+                    </StackLayout>
+                </CollectionView.EmptyView>
+
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Padding="0,4">
+                            <!-- Tarjeta del producto (idéntica visualmente al escritorio) -->
+                            <Frame BackgroundColor="{StaticResource BgCard}"
+                                   CornerRadius="12"
+                                   HasShadow="True"
+                                   Padding="16"
+                                   Margin="4">
+
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <!-- Nombre y marca -->
+                                    <Label Grid.Row="0" Grid.Column="0"
+                                           Text="{Binding Nombre}"
+                                           FontSize="16"
+                                           FontAttributes="Bold"
+                                           TextColor="{StaticResource TextPrimary}"
+                                           LineBreakMode="TailTruncation" />
+
+                                    <!-- Estado -->
+                                    <Label Grid.Row="0" Grid.Column="1"
+                                           Text="{Binding EstadoTexto}"
+                                           TextColor="{Binding EstadoColor}"
+                                           FontSize="12"
+                                           FontAttributes="Bold"
+                                           HorizontalOptions="End" />
+
+                                    <!-- Código y marca -->
+                                    <StackLayout Grid.Row="1" Grid.ColumnSpan="2"
+                                               Orientation="Horizontal"
+                                               Spacing="16"
+                                               Margin="0,4,0,0">
+                                        <Label Text="{Binding Codigo, StringFormat='🏷️ {0}'}"
+                                               FontSize="12"
+                                               TextColor="{StaticResource TextSecondary}" />
+                                        <Label Text="{Binding Marca, StringFormat='🏭 {0}'}"
+                                               FontSize="12"
+                                               TextColor="{StaticResource TextSecondary}" />
+                                    </StackLayout>
+
+                                    <!-- Precio y stock -->
+                                    <StackLayout Grid.Row="2" Grid.ColumnSpan="2"
+                                               Orientation="Horizontal"
+                                               Spacing="16"
+                                               Margin="0,8,0,0">
+                                        <Label Text="{Binding PrecioVenta, StringFormat='💰 ${0:F2}'}"
+                                               FontSize="14"
+                                               FontAttributes="Bold"
+                                               TextColor="{StaticResource Primary}" />
+                                        <Label Text="{Binding Stock, StringFormat='📊 {0} unidades'}"
+                                               FontSize="14"
+                                               TextColor="{StaticResource TextSecondary}" />
+                                    </StackLayout>
+
+                                    <!-- Separador -->
+                                    <BoxView Grid.Row="3" Grid.ColumnSpan="2"
+                                             Color="{StaticResource BorderColor}"
+                                             HeightRequest="1"
+                                             Margin="0,12,0,8" />
+                                </Grid>
+
+                                <!-- Efecto visual al tocar -->
+                                <Frame.GestureRecognizers>
+                                    <TapGestureRecognizer Tapped="OnProductoSeleccionado" />
+                                </Frame.GestureRecognizers>
+                            </Frame>
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </Grid>
+
+        <!-- Footer con información -->
+        <Frame Grid.Row="2" 
+               BackgroundColor="{StaticResource BgCard}"
+               CornerRadius="12"
+               Margin="16,8,16,16"
+               HasShadow="True"
+               Padding="16">
+            <StackLayout>
+                <Label Text="ℹ️ Información"
+                       FontSize="14"
+                       FontAttributes="Bold"
+                       TextColor="{StaticResource Primary}"
+                       Margin="0,0,0,8" />
+                <Label Text="• Toque un producto para ver detalles completos"
+                       FontSize="12"
+                       TextColor="{StaticResource TextSecondary}" />
+                <Label Text="• Use la búsqueda para encontrar productos específicos"
+                       FontSize="12"
+                       TextColor="{StaticResource TextSecondary}" />
+                <Label Text="• Los productos activos están disponibles para venta"
+                       FontSize="12"
+                       TextColor="{StaticResource TextSecondary}" />
+            </StackLayout>
+        </Frame>
+    </Grid>
+</ContentPage>
