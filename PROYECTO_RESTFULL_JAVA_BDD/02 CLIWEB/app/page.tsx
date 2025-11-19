@@ -16,15 +16,30 @@ export default function Home() {
   const [protocol, setProtocol] = useState<'REST' | 'SOAP'>('REST')
   const [statusMessage, setStatusMessage] = useState({ text: 'Listo', type: 'default' })
   const [connectionStatus, setConnectionStatus] = useState({ connected: false, details: '' })
+  const [creditoIdToLoad, setCreditoIdToLoad] = useState<number | null>(null)
+
+  const handleShowCreditTable = (idCredito: number) => {
+    console.log('Navegando a crédito con ID:', idCredito)
+    setCreditoIdToLoad(idCredito)
+    setActivePanel('credito')
+  }
 
   const renderPanel = () => {
     switch (activePanel) {
       case 'productos':
         return <ProductosPanel setStatus={setStatusMessage} />
+    case 'facturacion':
       case 'facturacion':
-        return <FacturacionPanel setStatus={setStatusMessage} />
+        return <FacturacionPanel
+          setStatus={setStatusMessage}
+          onShowCreditTable={handleShowCreditTable}
+        />
       case 'credito':
-        return <CreditoPanel setStatus={setStatusMessage} />
+        return <CreditoPanel
+          setStatus={setStatusMessage}
+          creditoIdToLoad={creditoIdToLoad}
+          onCreditoLoaded={() => setCreditoIdToLoad(null)}
+        />
       case 'conectividad':
         return <ConectividadPanel protocol={protocol} setProtocol={setProtocol} setStatus={setStatusMessage} setConnectionStatus={setConnectionStatus} />
       default:

@@ -213,7 +213,7 @@ public class MainFrame extends JFrame {
     
     private void createPanels() {
         productosPanel = new ProductosPanel(clienteService, statusBar);
-        facturacionPanel = new FacturacionPanel(clienteService, statusBar);
+        facturacionPanel = new FacturacionPanel(clienteService, statusBar, this);
         creditoPanel = new CreditoPanel(clienteService, statusBar);
         conectividadPanel = new ConectividadPanel(clienteService, statusBar);
     }
@@ -268,11 +268,16 @@ public class MainFrame extends JFrame {
         setActiveButton(btnFacturacion);
     }
     
-    private void showCreditoPanel() {
+    public void showCreditoPanel() {
         showPanel(creditoPanel, "Consultas de Crédito BanQuito");
         setActiveButton(btnCredito);
     }
-    
+
+    public CreditoPanel getCreditoPanel() {
+        return creditoPanel;
+    }
+
+
     private void showConectividadPanel() {
         showPanel(conectividadPanel, "Estado de Conectividad");
         setActiveButton(btnConectividad);

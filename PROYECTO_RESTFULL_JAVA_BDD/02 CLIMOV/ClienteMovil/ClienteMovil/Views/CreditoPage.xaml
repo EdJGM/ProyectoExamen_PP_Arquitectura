@@ -61,8 +61,8 @@
                                Grid.Row="0" Grid.Column="0"
                                Placeholder="Ingrese la cédula del cliente"
                                BackgroundColor="{StaticResource BgSecondary}"
-                               TextColor="{StaticResource TextPrimary}"
-                               PlaceholderColor="{StaticResource TextSecondary}"
+                               TextColor="{StaticResource BgCard}"
+                               PlaceholderColor="{StaticResource BgCard}"
                                Keyboard="Numeric"
                                MaxLength="10"
                                HeightRequest="45" />
@@ -166,8 +166,8 @@
                                Grid.Row="0" Grid.Column="0"
                                Placeholder="Ingrese el ID del crédito"
                                BackgroundColor="{StaticResource BgSecondary}"
-                               TextColor="{StaticResource TextPrimary}"
-                               PlaceholderColor="{StaticResource TextSecondary}"
+                               TextColor="{StaticResource BgCard}"
+                               PlaceholderColor="{StaticResource BgCard}"
                                Keyboard="Numeric"
                                HeightRequest="45" />
 

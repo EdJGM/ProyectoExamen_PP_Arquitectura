@@ -44,7 +44,21 @@ public class CreditoPanel extends JPanel {
         setupLayout();
         setupEventHandlers();
     }
-    
+
+    public void cargarTablaAmortizacion(int idCredito) {
+        SwingUtilities.invokeLater(() -> {
+            // Establecer el ID en el campo correspondiente
+            txtIdCredito.setText(String.valueOf(idCredito));
+
+            // Ejecutar la consulta automáticamente
+            verTablaAmortizacion();
+
+            // Mostrar mensaje informativo
+            statusBar.setSuccess("Mostrando tabla de amortización del crédito #" + idCredito);
+        });
+    }
+
+
     private void initializeComponents() {
         setBackground(UIConstants.BACKGROUND_MAIN);
         
@@ -99,7 +113,7 @@ public class CreditoPanel extends JPanel {
         tablaAmortizacion.setRowHeight(25);
         tablaAmortizacion.setGridColor(UIConstants.LIGHT_GRAY);
     }
-    
+
     private void setupLayout() {
         setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
@@ -292,7 +306,7 @@ public class CreditoPanel extends JPanel {
             });
     }
     
-    private void verTablaAmortizacion() {
+    public void verTablaAmortizacion() {
         String idTexto = txtIdCredito.getText().trim();
         if (idTexto.isEmpty()) {
             MessageHelper.showWarning(this, "Ingrese el ID del crédito");

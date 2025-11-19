@@ -5,6 +5,8 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { clienteUnificado } from '@/lib/api-client'
 import { toastContext } from '@/components/ui/toast-notification'
+import { CreditResultDialog } from '@/components/ui/credit-result-dialog'
+import { getPanelContext } from '@/hooks/use-panel-navigation'
 
 interface Electrodomestico {
   idElectrodomestico: number
@@ -23,11 +25,22 @@ interface ItemVenta {
   precio: number
 }
 
-interface FacturacionPanelProps {
-  setStatus: (status: { text: string; type: string }) => void
+interface CreditResult {
+  idFactura: number
+  idCreditoBanco: number
+  nombreCliente: string
+  cedula: string
+  subtotal: number
+  cuotaMensual: number
+  numeroCuotas: number
 }
 
-export default function FacturacionPanel({ setStatus }: FacturacionPanelProps) {
+interface FacturacionPanelProps {
+  setStatus: (status: { text: string; type: string }) => void
+  onShowCreditTable?: (idCredito: number) => void // Nueva prop opcional
+}
+
+export default function FacturacionPanel({ setStatus, onShowCreditTable }: FacturacionPanelProps) {
   const [productos, setProductos] = useState<Electrodomestico[]>([])
   const [items, setItems] = useState<ItemVenta[]>([])
   const [formulario, setFormulario] = useState({
@@ -43,6 +56,8 @@ export default function FacturacionPanel({ setStatus }: FacturacionPanelProps) {
   const [mostrarResultado, setMostrarResultado] = useState(false)
   const [selectedRowIndex, setSelectedRowIndex] = useState<number | null>(null)
   const [validando, setValidando] = useState(false)
+  const [showCreditDialog, setShowCreditDialog] = useState(false)
+  const [creditResult, setCreditResult] = useState<CreditResult | null>(null)
 
   useEffect(() => {
     cargarProductos()
@@ -285,29 +300,24 @@ TOTAL: $${totalEfectivo.toFixed(2)}`)
       const response = await clienteUnificado.procesarVentaCredito(solicitud)
       if (response?.exito) {
         const { subtotal } = calcularTotales()
-        
-        const mensaje = `Factura N°: ${response.idFactura}
-Crédito BanQuito N°: ${response.idCreditoBanco}
-Cliente: ${formulario.nombreCliente}
-Cédula: ${formulario.cedula}
-Monto: $${subtotal.toFixed(2)}
-Cuota Mensual: $${response.cuotaMensual.toFixed(2)}
-Número de Cuotas: ${response.numeroCuotas}
-Total a Pagar: $${(response.cuotaMensual * response.numeroCuotas).toFixed(2)}`
 
-        toastContext.showSuccess('Crédito Aprobado ✅', mensaje)
-        
-        setResultado(`✅ VENTA A CRÉDITO PROCESADA
-Factura N°: ${response.idFactura}
-Crédito BanQuito N°: ${response.idCreditoBanco}
-Cliente: ${formulario.nombreCliente}
-Cédula: ${formulario.cedula}
----
-Monto: $${subtotal.toFixed(2)}
-Cuota Mensual: $${response.cuotaMensual.toFixed(2)}
-Número de Cuotas: ${response.numeroCuotas}
-Total a Pagar: $${(response.cuotaMensual * response.numeroCuotas).toFixed(2)}`)
-        setMostrarResultado(true)
+        // Preparar datos para el diálogo
+        const resultadoCredito: CreditResult = {
+          idFactura: response.idFactura,
+          idCreditoBanco: response.idCreditoBanco,
+          nombreCliente: formulario.nombreCliente,
+          cedula: formulario.cedula,
+          subtotal,
+          cuotaMensual: response.cuotaMensual,
+          numeroCuotas: response.numeroCuotas
+        }
+
+        setCreditResult(resultadoCredito)
+        setShowCreditDialog(true) // Mostrar diálogo personalizado
+
+        // Toast de confirmación rápida
+        toastContext.showSuccess('Crédito Aprobado ✅', 'Venta a crédito procesada exitosamente')
+
         limpiarFormulario()
         setStatus({ text: 'Venta a crédito procesada exitosamente', type: 'success' })
       } else {
@@ -317,6 +327,22 @@ Total a Pagar: $${(response.cuotaMensual * response.numeroCuotas).toFixed(2)}`)
     } catch (error) {
       setStatus({ text: 'Error de conexión', type: 'error' })
       toastContext.showError('Error de Conexión ❌', 'No se pudo procesar el crédito. Intente de nuevo.')
+    }
+  }
+
+  const handleViewAmortization = () => {
+    console.log('handleViewAmortization ejecutado') // Para debugging
+    console.log('creditResult:', creditResult) // Para debugging
+
+    if (creditResult?.idCreditoBanco) {
+      console.log('Llamando onShowCreditTable con ID:', creditResult.idCreditoBanco) // Para debugging
+
+      // Llamar directamente al callback del padre
+      if (onShowCreditTable) {
+        onShowCreditTable(creditResult.idCreditoBanco)
+      }
+
+      setShowCreditDialog(false)
     }
   }
 
@@ -605,6 +631,15 @@ Total a Pagar: $${(response.cuotaMensual * response.numeroCuotas).toFixed(2)}`)
             Cerrar
           </Button>
         </div>
+      )}
+
+      {creditResult && (
+        <CreditResultDialog
+          isOpen={showCreditDialog}
+          onClose={() => setShowCreditDialog(false)}
+          resultado={creditResult}
+          onViewAmortization={handleViewAmortization}
+        />
       )}
     </div>
   )

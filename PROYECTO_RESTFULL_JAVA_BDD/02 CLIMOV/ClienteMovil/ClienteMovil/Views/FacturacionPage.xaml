@@ -9,7 +9,7 @@
         <ToolbarItem Text="🔄" 
                      Clicked="OnCargarProductosClicked"
                      Order="Primary" />
-        <ToolbarItem Text="🧹" 
+        <ToolbarItem Text="🧹 Limpiar"
                      Clicked="OnLimpiarFormularioClicked"
                      Order="Secondary" />
     </ContentPage.ToolbarItems>
@@ -63,8 +63,8 @@
                                Grid.Row="0" Grid.Column="0"
                                Placeholder="Ingrese la cédula del cliente"
                                BackgroundColor="{StaticResource BgSecondary}"
-                               TextColor="{StaticResource TextPrimary}"
-                               PlaceholderColor="{StaticResource TextSecondary}"
+                               TextColor="{StaticResource BgCard}"
+                               PlaceholderColor="{StaticResource BgCard}"
                                Keyboard="Numeric"
                                MaxLength="10"
                                HeightRequest="45" />
@@ -79,23 +79,24 @@
                                 Margin="8,0,0,0"
                                 Clicked="OnValidarClienteClicked" />
 
-                        <!-- Nombre del Cliente -->
-                        <Entry x:Name="EntryNombreCliente"
-                               Grid.Row="1" Grid.ColumnSpan="2"
-                               Placeholder="Nombre completo del cliente"
-                               BackgroundColor="{StaticResource BgSecondary}"
-                               TextColor="{StaticResource TextPrimary}"
-                               PlaceholderColor="{StaticResource TextSecondary}"
-                               HeightRequest="45"
-                               Margin="0,8,0,0" />
-
                         <!-- Resultado validación cliente -->
                         <Label x:Name="LabelNombreCliente"
                                Grid.Row="2" Grid.ColumnSpan="2"
                                Text="Cliente no validado"
                                FontSize="14"
-                               TextColor="{StaticResource MediumGray}"
-                               Margin="0,8,0,0" />                        
+                               TextColor="{StaticResource TextSecondary}"
+                               Margin="0,8,0,0" />
+
+                        <!-- Nombre del Cliente -->
+                        <Entry x:Name="EntryNombreCliente"
+                               Grid.Row="4" Grid.ColumnSpan="2"
+                               Placeholder="Nombre completo del cliente"
+                               BackgroundColor="{StaticResource BgSecondary}"
+                               TextColor="{StaticResource BgCard}"
+                               PlaceholderColor="{StaticResource BgCard}"
+                               HeightRequest="45"
+                               Margin="0,8,0,0" />
+         
                     </Grid>
                 </StackLayout>
             </Frame>

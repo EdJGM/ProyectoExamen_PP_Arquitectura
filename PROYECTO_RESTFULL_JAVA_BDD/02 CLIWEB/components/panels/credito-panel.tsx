@@ -3,18 +3,61 @@
 import { useState } from 'react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import { useEffect } from 'react'
+import { getPanelContext } from '@/hooks/use-panel-navigation'
+
 
 interface CreditoPanelProps {
   setStatus: (status: { text: string; type: string }) => void
+  creditoIdToLoad?: number | null
+  onCreditoLoaded?: () => void
 }
 
-export default function CreditoPanel({ setStatus }: CreditoPanelProps) {
+export default function CreditoPanel({ setStatus, creditoIdToLoad, onCreditoLoaded }: CreditoPanelProps) {
   const [cedulaValidacion, setCedulaValidacion] = useState('')
   const [cedulaAmortizacion, setCedulaAmortizacion] = useState('')
   const [resultadoValidacion, setResultadoValidacion] = useState('')
   const [tablaAmortizacion, setTablaAmortizacion] = useState<any[]>([])
   const [infoCredito, setInfoCredito] = useState('')
+  const panelContext = getPanelContext()
 
+
+  const cargarTablaAutomaticamente = async (idCredito: number) => {
+    setCedulaAmortizacion(String(idCredito))
+    setStatus({ text: 'Cargando tabla de amortización automáticamente...', type: 'loading' })
+
+    try {
+      await new Promise(resolve => setTimeout(resolve, 500))
+
+      const cuotas = Array.from({ length: 12 }, (_, i) => ({
+        numero: i + 1,
+        valor: 125.50,
+        interes: 15.50,
+        capital: 110.00,
+        saldo: 1500 - (110 * (i + 1)),
+        vencimiento: new Date(Date.now() + (i + 1) * 30 * 24 * 60 * 60 * 1000).toLocaleDateString('es-ES'),
+      }))
+
+      setTablaAmortizacion(cuotas)
+      setInfoCredito(`Crédito #${idCredito} - Monto: $1,500.00 - Tasa: 12.5% - Cuotas: 12`)
+      setStatus({ text: `Tabla de amortización cargada para crédito #${idCredito}`, type: 'success' })
+
+      // Notificar que se terminó de cargar
+      if (onCreditoLoaded) {
+        onCreditoLoaded()
+      }
+    } catch (error) {
+      setStatus({ text: 'Error al cargar tabla automáticamente', type: 'error' })
+    }
+  }
+
+  useEffect(() => {
+    if (creditoIdToLoad) {
+      console.log('Cargando automáticamente crédito ID:', creditoIdToLoad)
+      cargarTablaAutomaticamente(creditoIdToLoad)
+    }
+  }, [creditoIdToLoad])
+  
   const validarSujetoCredito = async () => {
     console.log('Cédula ingresada:', cedulaValidacion)
     if (!cedulaValidacion.trim()) {

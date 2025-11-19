@@ -25,7 +25,8 @@ public class FacturacionPanel extends JPanel {
     
     private ClienteUnificado clienteService;
     private StatusBar statusBar;
-    
+    private MainFrame parentFrame;
+
     // Componentes de cliente
     private JTextField txtCedula, txtNombreCliente;
     private JButton btnValidarCliente;
@@ -50,10 +51,11 @@ public class FacturacionPanel extends JPanel {
     private List<Electrodomestico> productosDisponibles;
     private List<ItemVenta> itemsVenta;
     
-    public FacturacionPanel(ClienteUnificado clienteService, StatusBar statusBar) {
+    public FacturacionPanel(ClienteUnificado clienteService, StatusBar statusBar, MainFrame parentFrame) {
         this.clienteService = clienteService;
         this.statusBar = statusBar;
         this.itemsVenta = new ArrayList<>();
+        this.parentFrame = parentFrame;
         
         initializeComponents();
         setupLayout();
@@ -602,9 +604,42 @@ public class FacturacionPanel extends JPanel {
         }
         
         mensaje.append("</body></html>");
-        
-        MessageHelper.showSuccess(this, mensaje.toString());
+
+        if ("CREDITO".equals(tipoVenta) && resultado.getIdCreditoBanco() > 0) {
+            int opcion = JOptionPane.showOptionDialog(
+                    this,
+                    mensaje.toString(),
+                    "Venta a Crédito Procesada",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.INFORMATION_MESSAGE,
+                    null,
+                    new String[]{"Ver Tabla de Amortización", "Cerrar"},
+                    "Ver Tabla de Amortización"
+            );
+
+            if (opcion == 0) {
+                mostrarTablaAmortizacion(resultado.getIdCreditoBanco());
+            }
+        } else {
+            MessageHelper.showSuccess(this, mensaje.toString());
+        }
     }
+
+    private void mostrarTablaAmortizacion(int idCredito) {
+        SwingUtilities.invokeLater(() -> {
+            try {
+                // Cambiar al panel de crédito
+                parentFrame.showCreditoPanel();
+
+                // Cargar automáticamente la tabla
+                parentFrame.getCreditoPanel().cargarTablaAmortizacion(idCredito);
+
+            } catch (Exception e) {
+                MessageHelper.showError(this, "Error al mostrar tabla de amortización: " + e.getMessage());
+            }
+        });
+    }
+
     
     private void limpiarFormulario() {
         txtCedula.setText("");
