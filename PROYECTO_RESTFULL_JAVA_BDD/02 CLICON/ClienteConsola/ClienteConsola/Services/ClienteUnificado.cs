@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace ClienteConsola.Services
@@ -26,7 +27,9 @@ namespace ClienteConsola.Services
             _jsonOptions = new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true,
-                WriteIndented = true
+                WriteIndented = true,
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+                NumberHandling = JsonNumberHandling.AllowReadingFromString
             };
 
             _soapClient = new SoapClient();
@@ -152,6 +155,101 @@ namespace ClienteConsola.Services
         }
 
         // ========== FACTURACIÓN ==========
+        public async Task<List<Factura>?> ListarFacturasAsync()
+        {
+            try
+            {
+                return await ListarFacturasREST();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error en ListarFacturas: {ex.Message}");
+                return null;
+            }
+        }
+
+        public async Task<RespuestaFactura?> ObtenerFacturaAsync(int idFactura)
+        {
+            try
+            {
+                return await ObtenerFacturaREST(idFactura);
+            }
+            catch (Exception ex)
+            {
+                return new RespuestaFactura
+                {
+                    Encontrada = false,
+                    Mensaje = $"Error: {ex.Message}"
+                };
+            }
+        }
+
+        // ========== IMPLEMENTACIONES REST ==========
+
+        private async Task<List<Factura>?> ListarFacturasREST()
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync(ConfiguracionEndpoints.REST.FACTURAS);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var json = await response.Content.ReadAsStringAsync();
+                    return JsonSerializer.Deserialize<List<Factura>>(json, _jsonOptions);
+                }
+
+                return new List<Factura>();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error en ListarFacturasREST: {ex.Message}");
+                return null;
+            }
+        }
+
+        private async Task<RespuestaFactura?> ObtenerFacturaREST(int idFactura)
+        {
+            try
+            {
+                var url = string.Format(ConfiguracionEndpoints.REST.FACTURA_POR_ID, idFactura);
+                var response = await _httpClient.GetAsync(url);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var json = await response.Content.ReadAsStringAsync();
+                    var respuesta = JsonSerializer.Deserialize<RespuestaFactura>(json, _jsonOptions);
+
+                    // La API devuelve los datos directamente en la respuesta
+                    if (respuesta != null)
+                    {
+                        respuesta.Encontrada = true;
+                        if (string.IsNullOrEmpty(respuesta.Mensaje))
+                        {
+                            respuesta.Mensaje = "Factura obtenida exitosamente";
+                        }
+                    }
+
+                    return respuesta;
+                }
+                else
+                {
+                    return new RespuestaFactura
+                    {
+                        Encontrada = false,
+                        Mensaje = "Factura no encontrada"
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                return new RespuestaFactura
+                {
+                    Encontrada = false,
+                    Mensaje = $"Error: {ex.Message}"
+                };
+            }
+        }
+
 
         public async Task<RespuestaVenta?> ProcesarVentaEfectivo(SolicitudVenta solicitud)
         {

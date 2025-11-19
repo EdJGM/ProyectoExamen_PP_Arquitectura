@@ -243,6 +243,114 @@ namespace ClienteMovil.Services
             }
         }
 
+        public async Task<List<Factura>?> ListarFacturasAsync()
+        {
+            try
+            {
+                if (ProtocoloActual == TipoProtocolo.REST)
+                {
+                    return await ListarFacturasREST();
+                }
+                else
+                {
+                    throw new NotImplementedException("SOAP será implementado en la siguiente fase");
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error en ListarFacturas: {ex.Message}");
+                return null;
+            }
+        }
+
+        public async Task<RespuestaFactura?> ObtenerFacturaAsync(int idFactura)
+        {
+            try
+            {
+                if (ProtocoloActual == TipoProtocolo.REST)
+                {
+                    return await ObtenerFacturaREST(idFactura);
+                }
+                else
+                {
+                    throw new NotImplementedException("SOAP será implementado en la siguiente fase");
+                }
+            }
+            catch (Exception ex)
+            {
+                return new RespuestaFactura
+                {
+                    Encontrada = false,
+                    Mensaje = $"Error: {ex.Message}"
+                };
+            }
+        }
+
+        // ========== IMPLEMENTACIONES REST ==========
+
+        private async Task<List<Factura>?> ListarFacturasREST()
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync(ConfiguracionEndpoints.REST.FACTURAS);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var json = await response.Content.ReadAsStringAsync();
+                    return JsonSerializer.Deserialize<List<Factura>>(json, _jsonOptions);
+                }
+
+                return new List<Factura>();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error en ListarFacturasREST: {ex.Message}");
+                return null;
+            }
+        }
+
+        private async Task<RespuestaFactura?> ObtenerFacturaREST(int idFactura)
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync(ConfiguracionEndpoints.REST.FacturaPorId(idFactura));
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var json = await response.Content.ReadAsStringAsync();
+                    var respuesta = JsonSerializer.Deserialize<RespuestaFactura>(json, _jsonOptions);
+
+                    if (respuesta != null)
+                    {
+                        respuesta.Encontrada = true;
+                        if (string.IsNullOrEmpty(respuesta.Mensaje))
+                        {
+                            respuesta.Mensaje = "Factura obtenida exitosamente";
+                        }
+                    }
+
+                    return respuesta;
+                }
+                else
+                {
+                    return new RespuestaFactura
+                    {
+                        Encontrada = false,
+                        Mensaje = "Factura no encontrada"
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                return new RespuestaFactura
+                {
+                    Encontrada = false,
+                    Mensaje = $"Error: {ex.Message}"
+                };
+            }
+        }
+
+
         public async Task<TablaAmortizacion?> ObtenerTablaAmortizacionAsync(int idCredito)
         {
             try

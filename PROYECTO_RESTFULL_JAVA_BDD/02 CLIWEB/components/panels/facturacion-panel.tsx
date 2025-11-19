@@ -38,9 +38,10 @@ interface CreditResult {
 interface FacturacionPanelProps {
   setStatus: (status: { text: string; type: string }) => void
   onShowCreditTable?: (idCredito: number) => void // Nueva prop opcional
+  onShowFacturas?: () => void
 }
 
-export default function FacturacionPanel({ setStatus, onShowCreditTable }: FacturacionPanelProps) {
+export default function FacturacionPanel({ setStatus, onShowCreditTable, onShowFacturas }: FacturacionPanelProps) {
   const [productos, setProductos] = useState<Electrodomestico[]>([])
   const [items, setItems] = useState<ItemVenta[]>([])
   const [formulario, setFormulario] = useState({
@@ -62,6 +63,14 @@ export default function FacturacionPanel({ setStatus, onShowCreditTable }: Factu
   useEffect(() => {
     cargarProductos()
   }, [])
+
+  const handleShowFacturas = () => {
+    if (onShowFacturas) {
+      onShowFacturas()
+    } else {
+      toastContext.showInfo('Navegación 📋', 'Use el menú lateral para ir a "Facturas"')
+    }
+  }
 
   const cargarProductos = async () => {
     setStatus({ text: 'Cargando productos...', type: 'loading' })
@@ -599,6 +608,20 @@ TOTAL: $${totalEfectivo.toFixed(2)}`)
             <div className="text-xs mt-1">${(subtotal / numeroCuotas).toFixed(2)}/mes {!formulario.clienteValidado && '⚠️'}</div>
           </Button>
         </div>
+
+        <div className="mt-4">
+          <Button
+            onClick={handleShowFacturas}
+            className="w-full py-4 font-bold"
+            style={{
+              backgroundColor: 'var(--info)',
+              color: 'white',
+            }}
+          >
+            <div className="text-lg">📋 Ver Facturas</div>
+            <div className="text-xs mt-1">Consultar facturas emitidas</div>
+          </Button>
+        </div>     
 
         {!formulario.clienteValidado && items.length > 0 && (
           <div

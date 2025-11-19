@@ -130,6 +130,10 @@ namespace ClienteConsola.Models
                 Console.WriteLine("   8. Venta en EFECTIVO (33% descuento)");
                 Console.WriteLine("   9. Venta a CRÉDITO DIRECTO");
 
+                Console.WriteLine("\n📄 CONSULTA DE FACTURAS:");
+                Console.WriteLine("   14. Listar todas las facturas");
+                Console.WriteLine("   15. Buscar factura por ID");
+
                 Console.WriteLine("\n🏦 CONSULTAS BANQUITO:");
                 Console.WriteLine("   10. Validar sujeto de crédito");
                 Console.WriteLine("   11. Consultar monto máximo de crédito");
@@ -191,6 +195,12 @@ namespace ClienteConsola.Models
                         case "13":
                             await TestConectividad();
                             break;
+                        case "14":
+                            await ListarFacturas();
+                            break;
+                        case "15":
+                            await BuscarFacturaPorId();
+                            break;
                         case "0":
                             Console.WriteLine("\n👋 Gracias por usar el sistema ESPE. ¡Hasta luego!");
                             return;
@@ -221,6 +231,174 @@ namespace ClienteConsola.Models
             Console.WriteLine("║                    MENÚ PRINCIPAL                           ║");
             Console.WriteLine("╚══════════════════════════════════════════════════════════════╝");
             Console.ResetColor();
+        }
+
+        private static async Task ListarFacturas()
+        {
+            Console.Clear();
+            Console.WriteLine("📄 LISTA DE FACTURAS\n");
+
+            var facturas = await _cliente.ListarFacturasAsync();
+
+            if (facturas?.Count > 0)
+            {
+                Console.WriteLine("┌─────┬──────────────┬──────────────────────────┬─────────────┬─────────────┬─────────────┬───────────┐");
+                Console.WriteLine("│ ID  │ Número       │ Cliente                  │ Cédula      │ Fecha       │ Total       │ Estado    │");
+                Console.WriteLine("├─────┼──────────────┼──────────────────────────┼─────────────┼─────────────┼─────────────┼───────────┤");
+
+                foreach (var f in facturas)
+                {
+                    // Formatear fecha para mostrar solo fecha sin hora si es muy larga
+                    string fechaCorta = f.FechaFactura.Length > 10 ?
+                                       f.FechaFactura.Substring(0, 10) : f.FechaFactura;
+
+                    Console.WriteLine($"│ {f.IdFactura,-3} │ {TruncarTexto(f.NumeroFactura, 12),-12} │ {TruncarTexto(f.NombreCliente, 24),-24} │ {f.CedulaCliente,-11} │ {fechaCorta,-11} │ ${f.Total,10:F2} │ {TruncarTexto(f.EstadoTexto, 9),-9} │");
+                }
+
+                Console.WriteLine("└─────┴──────────────┴──────────────────────────┴─────────────┴─────────────┴─────────────┴───────────┘");
+                Console.WriteLine($"\nTotal: {facturas.Count} facturas");
+
+                // Opción para ver detalle
+                Console.WriteLine("\n¿Desea ver el detalle de alguna factura? (ID/0 para salir)");
+                Console.Write("ID de factura: ");
+
+                if (int.TryParse(Console.ReadLine(), out int id) && id > 0)
+                {
+                    await MostrarDetalleFactura(id);
+                }
+            }
+            else
+            {
+                MostrarMensaje("ℹ️ No hay facturas registradas", ConsoleColor.Yellow);
+            }
+        }
+
+        private static async Task BuscarFacturaPorId()
+        {
+            Console.Clear();
+            Console.WriteLine("🔍 BUSCAR FACTURA POR ID\n");
+
+            Console.Write("Ingrese el ID de la factura: ");
+            if (int.TryParse(Console.ReadLine(), out int id))
+            {
+                await MostrarDetalleFactura(id);
+            }
+            else
+            {
+                MostrarMensaje("❌ ID inválido", ConsoleColor.Red);
+            }
+        }
+
+        private static async Task MostrarDetalleFactura(int idFactura)
+        {
+            Console.WriteLine($"\n🔄 Consultando factura #{idFactura}...");
+
+            var respuesta = await _cliente.ObtenerFacturaAsync(idFactura);
+
+            if (respuesta?.Encontrada == true)
+            {
+                var factura = respuesta.ToFactura();
+
+                Console.Clear();
+                Console.WriteLine("📄 DETALLE DE FACTURA");
+                Console.WriteLine("══════════════════════════════════════════════════════════════");
+
+                // Información básica
+                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.WriteLine($"📋 Factura: {factura.NumeroFactura}");
+                Console.WriteLine($"📅 Fecha: {factura.FechaFactura}");
+                Console.ResetColor();
+
+                Console.WriteLine($"👤 Cliente: {factura.NombreCliente}");
+                Console.WriteLine($"🆔 Cédula: {factura.CedulaCliente}");
+
+                // Estado con color
+                Console.Write("📊 Estado: ");
+                if (factura.Estado == "PAGADA")
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine(factura.EstadoTexto);
+                }
+                else
+                {
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    Console.WriteLine(factura.EstadoTexto);
+                }
+                Console.ResetColor();
+
+                Console.WriteLine($"💳 Forma de Pago: {factura.FormaPagoTexto}");
+
+                // Información de crédito si aplica
+                if (factura.FormaPago == "CREDITO_DIRECTO" && factura.NumeroCuotas > 0)
+                {
+                    Console.WriteLine($"🏦 Información de Crédito:");
+                    Console.WriteLine($"   • ID Crédito BanQuito: #{factura.IdCreditoBanco}");
+                    Console.WriteLine($"   • {factura.ResumenCredito}");
+                }
+
+                Console.WriteLine("\n💰 TOTALES:");
+                Console.WriteLine($"   • Subtotal: ${factura.Subtotal:F2}");
+                if (factura.Descuento > 0)
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine($"   • Descuento: -${factura.Descuento:F2}");
+                    Console.ResetColor();
+                }
+                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.WriteLine($"   • TOTAL: ${factura.Total:F2}");
+                Console.ResetColor();
+
+                // Items de la factura
+                if (respuesta.Items?.Count > 0)
+                {
+                    Console.WriteLine("\n🛒 PRODUCTOS FACTURADOS:");
+                    Console.WriteLine("┌──────────────────────────────────┬──────────────┬──────────┬─────────────┬─────────────┐");
+                    Console.WriteLine("│ Producto                         │ Marca        │ Cantidad │ Precio Unit.│ Subtotal    │");
+                    Console.WriteLine("├──────────────────────────────────┼──────────────┼──────────┼─────────────┼─────────────┤");
+
+                    foreach (var item in respuesta.Items)
+                    {
+                        Console.WriteLine($"│ {TruncarTexto(item.Nombre, 32),-32} │ {TruncarTexto(item.Marca, 12),-12} │ {item.Cantidad,8} │ ${item.PrecioUnitario,10:F2} │ ${item.Subtotal,10:F2} │");
+                    }
+
+                    Console.WriteLine("└──────────────────────────────────┴──────────────┴──────────┴─────────────┴─────────────┘");
+                }
+            }
+            else
+            {
+                MostrarMensaje($"❌ Factura no encontrada: {respuesta?.Mensaje ?? "Error desconocido"}", ConsoleColor.Red);
+            }
+        }
+
+        private static async Task MostrarTablaAmortizacionDirecta(int idCredito)
+        {
+            Console.WriteLine($"\n🔄 Consultando tabla de amortización para crédito #{idCredito}...");
+
+            var resultado = await _cliente.ObtenerTablaAmortizacion(idCredito);
+
+            if (resultado?.Encontrado == true && resultado.Cuotas?.Count > 0)
+            {
+                Console.WriteLine($"\n💳 TABLA DE AMORTIZACIÓN - CRÉDITO #{resultado.IdCredito}");
+                Console.WriteLine($"💰 Monto del crédito: ${resultado.MontoCredito:F2}");
+                Console.WriteLine($"📈 Tasa de interés: {resultado.TasaInteres:P2}");
+                Console.WriteLine($"📅 Número de cuotas: {resultado.NumeroCuotas}");
+                Console.WriteLine();
+
+                Console.WriteLine("┌────────┬────────────┬────────────┬────────────┬────────────┬──────────────┐");
+                Console.WriteLine("│ Cuota  │ Valor      │ Interés    │ Capital    │ Saldo      │ Vencimiento  │");
+                Console.WriteLine("├────────┼────────────┼────────────┼────────────┼────────────┼──────────────┤");
+
+                foreach (var cuota in resultado.Cuotas)
+                {
+                    Console.WriteLine($"│ {cuota.NumeroCuota,6} │ ${cuota.ValorCuota,9:F2} │ ${cuota.InteresPagado,9:F2} │ ${cuota.CapitalPagado,9:F2} │ ${cuota.Saldo,9:F2} │ {cuota.FechaVencimiento,12} │");
+                }
+
+                Console.WriteLine("└────────┴────────────┴────────────┴────────────┴────────────┴──────────────┘");
+            }
+            else
+            {
+                MostrarMensaje($"❌ {resultado?.Mensaje ?? "Tabla de amortización no encontrada"}", ConsoleColor.Red);
+            }
         }
 
         // ========== GESTIÓN DE PRODUCTOS ==========

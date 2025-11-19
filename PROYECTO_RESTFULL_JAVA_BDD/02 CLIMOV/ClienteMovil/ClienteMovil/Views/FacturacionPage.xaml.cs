@@ -52,6 +52,19 @@ namespace ClienteMovil.Views
 
         // ========== EVENTOS DE UI ==========
 
+        private async void OnVerFacturasClicked(object sender, EventArgs e)
+        {
+            try
+            {
+                // Navegar a la página de facturas
+                await Shell.Current.GoToAsync("//facturas");
+            }
+            catch (Exception ex)
+            {
+                await DisplayAlert("Error", $"Error al navegar a facturas: {ex.Message}", "OK");
+            }
+        }
+
         private async void OnCargarProductosClicked(object sender, EventArgs e)
         {
             await CargarProductosAsync();

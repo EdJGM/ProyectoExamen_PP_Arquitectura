@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="ClienteMovil.Views.FacturasPage"
+             Title="📋 Facturas"
+             BackgroundColor="{StaticResource BgPrimary}">
+
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="🔄" 
+                     Clicked="OnRefrescarClicked"
+                     Order="Primary" />
+        <ToolbarItem Text="🔍" 
+                     Clicked="OnBuscarFacturaClicked"
+                     Order="Secondary" />
+    </ContentPage.ToolbarItems>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Panel de filtros -->
+        <Frame Grid.Row="0" 
+               Style="{StaticResource CardFrame}"
+               Margin="16,16,16,8">
+            <StackLayout Spacing="12">
+                <Label Text="🔍 Filtros de Búsqueda"
+                       Style="{StaticResource SubtitleLabel}" />
+
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Campo de búsqueda -->
+                    <Entry x:Name="EntryBusqueda"
+                           Grid.Row="0" Grid.Column="0"
+                           Placeholder="Buscar por número, cliente o cédula..."
+                           Style="{StaticResource StyledEntry}" />
+
+                    <Button x:Name="BtnBuscar"
+                            Grid.Row="0" Grid.Column="1"
+                            Text="🔍"
+                            Style="{StaticResource InfoButton}"
+                            WidthRequest="50"
+                            Margin="8,0,0,0"
+                            Clicked="OnFiltrarClicked" />
+
+                    <!-- Filtros -->
+                    <StackLayout Grid.Row="1" Grid.ColumnSpan="2"
+                                Orientation="Horizontal"
+                                Spacing="10"
+                                Margin="0,8,0,0">
+                        <Picker x:Name="PickerFormaPago"
+                                Title="Forma de Pago"
+                                WidthRequest="140">
+                            <Picker.Items>
+                                <x:String>Todas</x:String>
+                                <x:String>EFECTIVO</x:String>
+                                <x:String>CREDITO_DIRECTO</x:String>
+                            </Picker.Items>
+                        </Picker>
+
+                        <Picker x:Name="PickerEstado"
+                                Title="Estado"
+                                WidthRequest="120">
+                            <Picker.Items>
+                                <x:String>Todos</x:String>
+                                <x:String>PAGADA</x:String>
+                                <x:String>PENDIENTE</x:String>
+                            </Picker.Items>
+                        </Picker>
+
+                        <Button Text="🧹"
+                                Style="{StaticResource WarningButton}"
+                                WidthRequest="50"
+                                Clicked="OnLimpiarFiltrosClicked" />
+                    </StackLayout>
+                </Grid>
+            </StackLayout>
+        </Frame>
+
+        <!-- Lista de facturas -->
+        <RefreshView x:Name="RefreshView" 
+                     Grid.Row="1"
+                     Refreshing="OnRefreshing"
+                     Margin="16,8">
+            <CollectionView x:Name="FacturasCollectionView">
+                <CollectionView.EmptyView>
+                    <StackLayout HorizontalOptions="Center" 
+                                VerticalOptions="Center"
+                                Spacing="12">
+                        <Label Text="📄"
+                               FontSize="48"
+                               HorizontalOptions="Center"
+                               TextColor="{StaticResource TextSecondary}" />
+                        <Label Text="No hay facturas registradas"
+                               FontSize="16"
+                               HorizontalOptions="Center"
+                               TextColor="{StaticResource TextSecondary}" />
+                        <Button Text="🔄 Actualizar"
+                                Style="{StaticResource PrimaryButton}"
+                                Clicked="OnRefrescarClicked" />
+                    </StackLayout>
+                </CollectionView.EmptyView>
+
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Padding="4">
+                            <Frame Style="{StaticResource CardFrame}"
+                                   Margin="0,2">
+                                <Frame.GestureRecognizers>
+                                    <TapGestureRecognizer Tapped="OnFacturaTapped" />
+                                </Frame.GestureRecognizers>
+
+                                <Grid Padding="12">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <!-- Número de factura -->
+                                    <Label Grid.Row="0" Grid.Column="0"
+                                           Text="{Binding NumeroFactura}"
+                                           Style="{StaticResource SubtitleLabel}"
+                                           FontAttributes="Bold" />
+
+                                    <!-- Estado -->
+                                    <Label Grid.Row="0" Grid.Column="1"
+                                           Text="{Binding EstadoTexto}"
+                                           TextColor="{Binding EstadoColor}"
+                                           FontSize="12"
+                                           FontAttributes="Bold"
+                                           VerticalOptions="Center" />
+
+                                    <!-- Total -->
+                                    <Label Grid.Row="0" Grid.Column="2"
+                                           Text="{Binding TotalFormateado}"
+                                           Style="{StaticResource SubtitleLabel}"
+                                           TextColor="{StaticResource Primary}"
+                                           FontAttributes="Bold"
+                                           VerticalOptions="Center" />
+
+                                    <!-- Cliente y Cédula -->
+                                    <Label Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
+                                           Text="{Binding NombreCliente}"
+                                           Style="{StaticResource BodyLabel}"
+                                           FontAttributes="Bold" />
+
+                                    <!-- Fecha -->
+                                    <Label Grid.Row="1" Grid.Column="2"
+                                           Text="{Binding FechaFormateada}"
+                                           Style="{StaticResource CaptionLabel}"
+                                           VerticalOptions="Center" />
+
+                                    <!-- Cédula y Forma de pago -->
+                                    <Label Grid.Row="2" Grid.Column="0"
+                                           Text="{Binding CedulaCliente}"
+                                           Style="{StaticResource CaptionLabel}" />
+
+                                    <Label Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2"
+                                           Text="{Binding FormaPagoTexto}"
+                                           Style="{StaticResource CaptionLabel}"
+                                           HorizontalOptions="End" />
+                                </Grid>
+                            </Frame>
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </RefreshView>
+
+        <!-- Panel de estado -->
+        <Frame Grid.Row="2" 
+               BackgroundColor="{StaticResource BgCard}"
+               CornerRadius="0"
+               HasShadow="True"
+               Padding="16,12">
+            <StackLayout Orientation="Horizontal" Spacing="12">
+                <ActivityIndicator x:Name="LoadingIndicator"
+                                  IsVisible="False"
+                                  IsRunning="False"
+                                  Color="{StaticResource Primary}"
+                                  WidthRequest="20"
+                                  HeightRequest="20" />
+                <Label x:Name="StatusLabel"
+                       Text="Listo"
+                       Style="{StaticResource BodyLabel}"
+                       VerticalOptions="Center" />
+            </StackLayout>
+        </Frame>
+    </Grid>
+
+</ContentPage>

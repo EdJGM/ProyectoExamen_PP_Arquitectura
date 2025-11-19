@@ -8,8 +8,9 @@ import ProductosPanel from '@/components/panels/productos-panel'
 import FacturacionPanel from '@/components/panels/facturacion-panel'
 import CreditoPanel from '@/components/panels/credito-panel'
 import ConectividadPanel from '@/components/panels/conectividad-panel'
+import FacturasPanel from '@/components/panels/facturas-panel'
 
-type PanelType = 'productos' | 'facturacion' | 'credito' | 'conectividad'
+type PanelType = 'productos' | 'facturacion' | 'facturas' | 'credito' | 'conectividad'
 
 export default function Home() {
   const [activePanel, setActivePanel] = useState<PanelType>('productos')
@@ -24,6 +25,10 @@ export default function Home() {
     setActivePanel('credito')
   }
 
+  const handleShowFacturas = () => {
+    setActivePanel('facturas')
+  }
+
   const renderPanel = () => {
     switch (activePanel) {
       case 'productos':
@@ -33,7 +38,16 @@ export default function Home() {
         return <FacturacionPanel
           setStatus={setStatusMessage}
           onShowCreditTable={handleShowCreditTable}
+          onShowFacturas={handleShowFacturas}
         />
+      case 'facturas': // NUEVO CASO
+        return <FacturasPanel setStatus={setStatusMessage} />
+      case 'credito':
+        return <CreditoPanel
+          setStatus={setStatusMessage}
+          creditoIdToLoad={creditoIdToLoad}
+          onCreditoLoaded={() => setCreditoIdToLoad(null)}
+        />        
       case 'credito':
         return <CreditoPanel
           setStatus={setStatusMessage}
@@ -53,6 +67,8 @@ export default function Home() {
         return 'Gestión de Productos'
       case 'facturacion':
         return 'Sistema de Facturación'
+      case 'facturas': // NUEVO TÍTULO
+        return 'Consulta de Facturas'        
       case 'credito':
         return 'Consultas de Crédito BanQuito'
       case 'conectividad':
@@ -65,7 +81,7 @@ export default function Home() {
   return (
     <div className="flex flex-col h-screen" style={{ backgroundColor: 'var(--bg-main)', color: 'var(--dark-gray)' }}>
       <Header />
-      
+
       <div className="flex flex-1 overflow-hidden">
         <Sidebar activePanel={activePanel} onPanelChange={setActivePanel} />
 

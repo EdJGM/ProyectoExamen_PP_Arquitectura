@@ -150,4 +150,133 @@ public class FacturaDAO {
         }
         return null;
     }
+    
+public List<java.util.Map<String, Object>> listarTodasFacturas() {
+        List<java.util.Map<String, Object>> lista = new ArrayList<>();
+        Connection conn = null;
+        
+        try {
+            conn = DatabaseConnection.getConnection();
+            String sql = "SELECT f.id_factura, f.numero_factura, f.cedula_cliente, " +
+                        "f.nombre_cliente, f.fecha_factura, f.subtotal, f.descuento, " +
+                        "f.total, f.forma_pago, f.estado, " +
+                        "ca.cuota_mensual, ca.numero_cuotas " +
+                        "FROM factura f " +
+                        "LEFT JOIN credito_aprobado ca ON f.id_factura = ca.id_factura " +
+                        "ORDER BY f.fecha_factura DESC";
+            
+            PreparedStatement pst = conn.prepareStatement(sql);
+            ResultSet rs = pst.executeQuery();
+            
+            while (rs.next()) {
+                java.util.Map<String, Object> factura = new java.util.HashMap<>();
+                factura.put("idFactura", rs.getInt("id_factura"));
+                factura.put("numeroFactura", rs.getString("numero_factura"));
+                factura.put("cedulaCliente", rs.getString("cedula_cliente"));
+                factura.put("nombreCliente", rs.getString("nombre_cliente"));
+                factura.put("fechaFactura", rs.getTimestamp("fecha_factura").toString());
+                factura.put("subtotal", rs.getDouble("subtotal"));
+                factura.put("descuento", rs.getDouble("descuento"));
+                factura.put("total", rs.getDouble("total"));
+                factura.put("formaPago", rs.getString("forma_pago"));
+                factura.put("estado", rs.getString("estado"));
+                
+                // Datos de crédito (si aplica)
+                if (rs.getObject("cuota_mensual") != null) {
+                    factura.put("cuotaMensual", rs.getDouble("cuota_mensual"));
+                    factura.put("numeroCuotas", rs.getInt("numero_cuotas"));
+                } else {
+                    factura.put("cuotaMensual", null);
+                    factura.put("numeroCuotas", null);
+                }
+                
+                lista.add(factura);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            DatabaseConnection.closeConnection(conn);
+        }
+        
+        return lista;
+    }
+    
+    // Obtener detalle completo de una factura con sus items
+    public java.util.Map<String, Object> obtenerFacturaCompleta(int idFactura) {
+        java.util.Map<String, Object> resultado = new java.util.HashMap<>();
+        Connection conn = null;
+        
+        try {
+            conn = DatabaseConnection.getConnection();
+            
+            // Obtener datos de la factura
+            String sqlFactura = "SELECT f.*, ca.cuota_mensual, ca.numero_cuotas, ca.id_credito_banco " +
+                              "FROM factura f " +
+                              "LEFT JOIN credito_aprobado ca ON f.id_factura = ca.id_factura " +
+                              "WHERE f.id_factura = ?";
+            
+            PreparedStatement pstFactura = conn.prepareStatement(sqlFactura);
+            pstFactura.setInt(1, idFactura);
+            ResultSet rsFactura = pstFactura.executeQuery();
+            
+            if (!rsFactura.next()) {
+                resultado.put("encontrada", false);
+                resultado.put("mensaje", "Factura no encontrada");
+                return resultado;
+            }
+            
+            resultado.put("encontrada", true);
+            resultado.put("idFactura", rsFactura.getInt("id_factura"));
+            resultado.put("numeroFactura", rsFactura.getString("numero_factura"));
+            resultado.put("cedulaCliente", rsFactura.getString("cedula_cliente"));
+            resultado.put("nombreCliente", rsFactura.getString("nombre_cliente"));
+            resultado.put("fechaFactura", rsFactura.getTimestamp("fecha_factura").toString());
+            resultado.put("subtotal", rsFactura.getDouble("subtotal"));
+            resultado.put("descuento", rsFactura.getDouble("descuento"));
+            resultado.put("total", rsFactura.getDouble("total"));
+            resultado.put("formaPago", rsFactura.getString("forma_pago"));
+            resultado.put("estado", rsFactura.getString("estado"));
+            
+            // Datos de crédito si aplica
+            if (rsFactura.getObject("cuota_mensual") != null) {
+                resultado.put("cuotaMensual", rsFactura.getDouble("cuota_mensual"));
+                resultado.put("numeroCuotas", rsFactura.getInt("numero_cuotas"));
+                resultado.put("idCreditoBanco", rsFactura.getInt("id_credito_banco"));
+            }
+            
+            // Obtener detalle de productos
+            String sqlDetalle = "SELECT df.*, e.nombre, e.marca " +
+                              "FROM detalle_factura df " +
+                              "INNER JOIN electrodomestico e ON df.id_electrodomestico = e.id_electrodomestico " +
+                              "WHERE df.id_factura = ?";
+            
+            PreparedStatement pstDetalle = conn.prepareStatement(sqlDetalle);
+            pstDetalle.setInt(1, idFactura);
+            ResultSet rsDetalle = pstDetalle.executeQuery();
+            
+            List<java.util.Map<String, Object>> items = new ArrayList<>();
+            while (rsDetalle.next()) {
+                java.util.Map<String, Object> item = new java.util.HashMap<>();
+                item.put("idElectrodomestico", rsDetalle.getInt("id_electrodomestico"));
+                item.put("nombre", rsDetalle.getString("nombre"));
+                item.put("marca", rsDetalle.getString("marca"));
+                item.put("cantidad", rsDetalle.getInt("cantidad"));
+                item.put("precioUnitario", rsDetalle.getDouble("precio_unitario"));
+                item.put("subtotal", rsDetalle.getDouble("subtotal"));
+                items.add(item);
+            }
+            
+            resultado.put("items", items);
+            resultado.put("mensaje", "Factura obtenida exitosamente");
+            
+        } catch (SQLException e) {
+            resultado.put("encontrada", false);
+            resultado.put("mensaje", "Error: " + e.getMessage());
+            e.printStackTrace();
+        } finally {
+            DatabaseConnection.closeConnection(conn);
+        }
+        
+        return resultado;
+    }    
 }

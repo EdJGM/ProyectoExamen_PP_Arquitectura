@@ -188,6 +188,154 @@ namespace ClienteConsola.Models
         public string Timestamp { get; set; } = string.Empty;
     }
 
+    public class Factura
+    {
+        [JsonPropertyName("idFactura")]
+        public int IdFactura { get; set; }
+
+        [JsonPropertyName("numeroFactura")]
+        public string NumeroFactura { get; set; } = string.Empty;
+
+        [JsonPropertyName("cedulaCliente")]
+        public string CedulaCliente { get; set; } = string.Empty;
+
+        [JsonPropertyName("nombreCliente")]
+        public string NombreCliente { get; set; } = string.Empty;
+
+        [JsonPropertyName("fechaFactura")]
+        public string FechaFactura { get; set; } = string.Empty;
+
+        [JsonPropertyName("subtotal")]
+        public double Subtotal { get; set; }
+
+        [JsonPropertyName("descuento")]
+        public double Descuento { get; set; }
+
+        [JsonPropertyName("total")]
+        public double Total { get; set; }
+
+        [JsonPropertyName("formaPago")]
+        public string FormaPago { get; set; } = string.Empty;
+
+        [JsonPropertyName("estado")]
+        public string Estado { get; set; } = string.Empty;
+
+        [JsonPropertyName("numeroCuotas")]
+        public int? NumeroCuotas { get; set; }
+
+        [JsonPropertyName("cuotaMensual")]
+        public double? CuotaMensual { get; set; }
+
+        [JsonPropertyName("idCreditoBanco")]
+        public int? IdCreditoBanco { get; set; }
+
+        [JsonPropertyName("items")]
+        public List<ItemFactura> Items { get; set; } = new List<ItemFactura>();
+
+        // Propiedades calculadas para mostrar en consola
+        public string FormaPagoTexto => FormaPago == "EFECTIVO" ? "Efectivo (33% desc.)" : "Crédito Directo";
+        public string EstadoTexto => Estado == "PAGADA" ? "✅ Pagada" : "⏳ Pendiente";
+        public string ResumenCredito => FormaPago == "CREDITO_DIRECTO" && NumeroCuotas.HasValue && CuotaMensual.HasValue ?
+            $"{NumeroCuotas.Value} cuotas de ${CuotaMensual.Value:F2}" : "N/A";
+    }
+
+    public class ItemFactura
+    {
+        [JsonPropertyName("idElectrodomestico")]
+        public int IdElectrodomestico { get; set; }
+
+        [JsonPropertyName("nombre")]
+        public string Nombre { get; set; } = string.Empty;
+
+        [JsonPropertyName("marca")]
+        public string Marca { get; set; } = string.Empty;
+
+        [JsonPropertyName("cantidad")]
+        public int Cantidad { get; set; }
+
+        [JsonPropertyName("precioUnitario")]
+        public double PrecioUnitario { get; set; }
+
+        [JsonPropertyName("subtotal")]
+        public double Subtotal { get; set; }
+
+        public string DescripcionCompleta => $"{Nombre} ({Marca}) x {Cantidad}";
+    }
+
+    public class RespuestaFactura
+    {
+        [JsonPropertyName("encontrada")]
+        public bool Encontrada { get; set; }
+
+        [JsonPropertyName("mensaje")]
+        public string Mensaje { get; set; } = string.Empty;
+
+        // La respuesta incluye todos los campos de la factura directamente
+        [JsonPropertyName("idFactura")]
+        public int IdFactura { get; set; }
+
+        [JsonPropertyName("numeroFactura")]
+        public string NumeroFactura { get; set; } = string.Empty;
+
+        [JsonPropertyName("cedulaCliente")]
+        public string CedulaCliente { get; set; } = string.Empty;
+
+        [JsonPropertyName("nombreCliente")]
+        public string NombreCliente { get; set; } = string.Empty;
+
+        [JsonPropertyName("fechaFactura")]
+        public string FechaFactura { get; set; } = string.Empty;
+
+        [JsonPropertyName("subtotal")]
+        public double Subtotal { get; set; }
+
+        [JsonPropertyName("descuento")]
+        public double Descuento { get; set; }
+
+        [JsonPropertyName("total")]
+        public double Total { get; set; }
+
+        [JsonPropertyName("formaPago")]
+        public string FormaPago { get; set; } = string.Empty;
+
+        [JsonPropertyName("estado")]
+        public string Estado { get; set; } = string.Empty;
+
+        [JsonPropertyName("numeroCuotas")]
+        public int? NumeroCuotas { get; set; }
+
+        [JsonPropertyName("cuotaMensual")]
+        public double? CuotaMensual { get; set; }
+
+        [JsonPropertyName("idCreditoBanco")]
+        public int? IdCreditoBanco { get; set; }
+
+        [JsonPropertyName("items")]
+        public List<ItemFactura> Items { get; set; } = new List<ItemFactura>();
+
+        // Método para convertir a objeto Factura
+        public Factura ToFactura()
+        {
+            return new Factura
+            {
+                IdFactura = this.IdFactura,
+                NumeroFactura = this.NumeroFactura,
+                CedulaCliente = this.CedulaCliente,
+                NombreCliente = this.NombreCliente,
+                FechaFactura = this.FechaFactura,
+                Subtotal = this.Subtotal,
+                Descuento = this.Descuento,
+                Total = this.Total,
+                FormaPago = this.FormaPago,
+                Estado = this.Estado,
+                NumeroCuotas = this.NumeroCuotas,
+                CuotaMensual = this.CuotaMensual,
+                IdCreditoBanco = this.IdCreditoBanco,
+                Items = this.Items
+            };
+        }
+    }
+
     // ========== ESTADOS DE CONECTIVIDAD ==========
 
     public class EstadoConectividad
@@ -216,6 +364,9 @@ namespace ClienteConsola.Models
             public const string VENTA_EFECTIVO = BASE_COMERCIALIZADORA + "/facturacion/venta-efectivo";
             public const string VENTA_CREDITO = BASE_COMERCIALIZADORA + "/facturacion/venta-credito";
             public const string TABLA_AMORTIZACION_FACTURA = BASE_COMERCIALIZADORA + "/facturacion/tabla-amortizacion/{0}";
+
+            public const string FACTURAS = BASE_COMERCIALIZADORA + "/facturacion/facturas";
+            public const string FACTURA_POR_ID = BASE_COMERCIALIZADORA + "/facturacion/facturas/{0}";
 
             // BanQuito
             public const string VALIDAR_CREDITO = BASE_BANQUITO + "/validar/{0}";

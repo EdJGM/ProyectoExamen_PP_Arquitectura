@@ -11,6 +11,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -43,6 +44,14 @@ public class ClienteUnificado {
 
         this.soapClient = new SoapClient();
         this.protocoloActual = TipoProtocolo.REST;
+    }
+
+    public CompletableFuture<List<Factura>> listarFacturasAsync() {
+        return listarFacturasREST();
+    }
+
+    public CompletableFuture<RespuestaFactura> obtenerFacturaAsync(int idFactura) {
+        return obtenerFacturaREST(idFactura);
     }
 
     // ========== CONFIGURACIÓN ==========
@@ -428,6 +437,64 @@ public class ClienteUnificado {
 
             } catch (Exception e) {
                 return null;
+            }
+        });
+    }
+
+    private CompletableFuture<List<Factura>> listarFacturasREST() {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                HttpRequest request = HttpRequest.newBuilder()
+                        .uri(URI.create(BASE_COMERCIALIZADORA + "/facturacion/facturas"))
+                        .GET()
+                        .build();
+
+                HttpResponse<String> response = httpClient.send(request,
+                        HttpResponse.BodyHandlers.ofString());
+
+                if (response.statusCode() == 200) {
+                    return gson.fromJson(response.body(),
+                            new TypeToken<List<Factura>>(){}.getType());
+                }
+                return new ArrayList<>();
+            } catch (Exception e) {
+                throw new RuntimeException("Error al listar facturas: " + e.getMessage(), e);
+            }
+        });
+    }
+
+    private CompletableFuture<RespuestaFactura> obtenerFacturaREST(int idFactura) {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                HttpRequest request = HttpRequest.newBuilder()
+                        .uri(URI.create(BASE_COMERCIALIZADORA + "/facturacion/facturas/" + idFactura))
+                        .GET()
+                        .build();
+
+                HttpResponse<String> response = httpClient.send(request,
+                        HttpResponse.BodyHandlers.ofString());
+
+                if (response.statusCode() == 200) {
+                    // La respuesta contiene la factura directamente con algunos campos adicionales
+                    Factura factura = gson.fromJson(response.body(), Factura.class);
+
+                    RespuestaFactura respuesta = new RespuestaFactura();
+                    respuesta.setEncontrada(true);
+                    respuesta.setMensaje("Factura obtenida exitosamente");
+                    respuesta.setFactura(factura);
+
+                    return respuesta;
+                } else {
+                    RespuestaFactura respuesta = new RespuestaFactura();
+                    respuesta.setEncontrada(false);
+                    respuesta.setMensaje("Factura no encontrada");
+                    return respuesta;
+                }
+            } catch (Exception e) {
+                RespuestaFactura respuesta = new RespuestaFactura();
+                respuesta.setEncontrada(false);
+                respuesta.setMensaje("Error al obtener factura: " + e.getMessage());
+                return respuesta;
             }
         });
     }

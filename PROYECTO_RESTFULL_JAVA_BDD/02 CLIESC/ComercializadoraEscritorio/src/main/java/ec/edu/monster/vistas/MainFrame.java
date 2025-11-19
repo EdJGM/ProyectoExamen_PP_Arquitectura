@@ -25,7 +25,8 @@ public class MainFrame extends JFrame {
     private JPanel sidebarPanel;
     private StatusBar statusBar;
     private JLabel protocolLabel;
-    
+    private FacturasPanel facturasPanel;
+
     // Paneles de contenido
     private ProductosPanel productosPanel;
     private FacturacionPanel facturacionPanel;
@@ -39,7 +40,9 @@ public class MainFrame extends JFrame {
     private JButton btnConectividad;
     private JToggleButton btnRest;
     private JToggleButton btnSoap;
-    
+    private JButton btnFacturas;
+
+
     public MainFrame() {
         initializeServices();
         initializeComponents();
@@ -136,11 +139,15 @@ public class MainFrame extends JFrame {
         btnFacturacion = createSidebarButton("🧾 Facturación", UIConstants.ICON_INVOICE);
         btnCredito = createSidebarButton("💳 Crédito", UIConstants.ICON_CREDIT);
         btnConectividad = createSidebarButton("🔧 Conectividad", UIConstants.ICON_SETTINGS);
-        
+        btnFacturas = createSidebarButton("📋 Facturas", UIConstants.ICON_INVOICE);
+
+
         // Agregar botones al sidebar
         sidebarPanel.add(btnProductos);
         sidebarPanel.add(Box.createVerticalStrut(10));
         sidebarPanel.add(btnFacturacion);
+        sidebarPanel.add(Box.createVerticalStrut(10));
+        sidebarPanel.add(btnFacturas);
         sidebarPanel.add(Box.createVerticalStrut(10));
         sidebarPanel.add(btnCredito);
         sidebarPanel.add(Box.createVerticalStrut(10));
@@ -214,6 +221,7 @@ public class MainFrame extends JFrame {
     private void createPanels() {
         productosPanel = new ProductosPanel(clienteService, statusBar);
         facturacionPanel = new FacturacionPanel(clienteService, statusBar, this);
+        facturasPanel = new FacturasPanel(clienteService, statusBar, this);
         creditoPanel = new CreditoPanel(clienteService, statusBar);
         conectividadPanel = new ConectividadPanel(clienteService, statusBar);
     }
@@ -226,6 +234,7 @@ public class MainFrame extends JFrame {
         // Eventos de botones del sidebar
         btnProductos.addActionListener(e -> showProductosPanel());
         btnFacturacion.addActionListener(e -> showFacturacionPanel());
+        btnFacturas.addActionListener(e -> showFacturasPanel());
         btnCredito.addActionListener(e -> showCreditoPanel());
         btnConectividad.addActionListener(e -> showConectividadPanel());
         
@@ -241,7 +250,12 @@ public class MainFrame extends JFrame {
             }
         });
     }
-    
+
+    private void showFacturasPanel() {
+        showPanel(facturasPanel, "Consulta de Facturas");
+        setActiveButton(btnFacturas);
+    }
+
     private void setupLookAndFeel() {
         try {
             // Usar look and feel del sistema
@@ -308,6 +322,7 @@ public class MainFrame extends JFrame {
         // Resetear todos los botones
         btnProductos.setBackground(UIConstants.BACKGROUND_SIDEBAR);
         btnFacturacion.setBackground(UIConstants.BACKGROUND_SIDEBAR);
+        btnFacturas.setBackground(UIConstants.BACKGROUND_SIDEBAR);  // NUEVA LÍNEA
         btnCredito.setBackground(UIConstants.BACKGROUND_SIDEBAR);
         btnConectividad.setBackground(UIConstants.BACKGROUND_SIDEBAR);
         

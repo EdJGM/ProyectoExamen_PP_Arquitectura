@@ -2,13 +2,14 @@
 
 interface SidebarProps {
   activePanel: string
-  onPanelChange: (panel: 'productos' | 'facturacion' | 'credito' | 'conectividad') => void
+  onPanelChange: (panel: 'productos' | 'facturacion' | 'facturas' | 'credito' | 'conectividad') => void
 }
 
 export default function Sidebar({ activePanel, onPanelChange }: SidebarProps) {
   const menuItems = [
     { id: 'productos', icon: '📦', label: 'Productos' },
     { id: 'facturacion', icon: '🧾', label: 'Facturación' },
+    { id: 'facturas', icon: '📋', label: 'Facturas' },
     { id: 'credito', icon: '💳', label: 'Crédito' },
     { id: 'conectividad', icon: '🔧', label: 'Conectividad' },
   ]

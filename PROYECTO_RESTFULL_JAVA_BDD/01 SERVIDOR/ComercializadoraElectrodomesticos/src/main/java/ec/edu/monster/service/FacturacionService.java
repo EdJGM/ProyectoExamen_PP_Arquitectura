@@ -178,6 +178,17 @@ public class FacturacionService {
         }
     }
     
+    public List<Map<String, Object>> listarTodasFacturas() {
+       return facturaDAO.listarTodasFacturas();
+    }
+
+    /**
+     * Obtiene el detalle completo de una factura con sus items
+     */
+    public Map<String, Object> obtenerFacturaCompleta(int idFactura) {
+        return facturaDAO.obtenerFacturaCompleta(idFactura);
+    }    
+    
     public void cerrarCliente() {
         if (banquitoClient != null) {
             banquitoClient.close();

@@ -109,6 +109,12 @@
         <ShellContent ContentTemplate="{DataTemplate views:FacturacionPage}" />
     </FlyoutItem>
 
+    <FlyoutItem Title="Facturas" 
+            Icon="📋"
+            Route="facturas">
+        <ShellContent ContentTemplate="{DataTemplate views:FacturasPage}" />
+    </FlyoutItem>
+
     <!-- Crédito (equivalente a CreditoPanel) -->
     <FlyoutItem Title="Crédito BanQuito" 
                 Icon="💳"

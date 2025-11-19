@@ -28,6 +28,7 @@ namespace ClienteMovil
             builder.Services.AddTransient<LoginPage>();
             builder.Services.AddTransient<ProductosPage>();
             builder.Services.AddTransient<FacturacionPage>();
+            builder.Services.AddTransient<FacturasPage>();
             builder.Services.AddTransient<CreditoPage>();
             builder.Services.AddTransient<ConectividadPage>();
 

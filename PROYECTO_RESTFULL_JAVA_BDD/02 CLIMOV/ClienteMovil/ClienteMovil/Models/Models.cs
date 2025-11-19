@@ -69,6 +69,172 @@ namespace ClienteMovil.Models
     }
 
     // ========== FACTURACIÓN ==========
+    public class Factura : INotifyPropertyChanged
+    {
+        [JsonPropertyName("idFactura")]
+        public int IdFactura { get; set; }
+
+        [JsonPropertyName("numeroFactura")]
+        public string NumeroFactura { get; set; } = string.Empty;
+
+        [JsonPropertyName("cedulaCliente")]
+        public string CedulaCliente { get; set; } = string.Empty;
+
+        [JsonPropertyName("nombreCliente")]
+        public string NombreCliente { get; set; } = string.Empty;
+
+        [JsonPropertyName("fechaFactura")]
+        public string FechaFactura { get; set; } = string.Empty;
+
+        [JsonPropertyName("subtotal")]
+        public decimal Subtotal { get; set; }
+
+        [JsonPropertyName("descuento")]
+        public decimal Descuento { get; set; }
+
+        [JsonPropertyName("total")]
+        public decimal Total { get; set; }
+
+        [JsonPropertyName("formaPago")]
+        public string FormaPago { get; set; } = string.Empty;
+
+        [JsonPropertyName("estado")]
+        public string Estado { get; set; } = string.Empty;
+
+        [JsonPropertyName("numeroCuotas")]
+        public int? NumeroCuotas { get; set; }
+
+        [JsonPropertyName("cuotaMensual")]
+        public decimal? CuotaMensual { get; set; }
+
+        [JsonPropertyName("idCreditoBanco")]
+        public int? IdCreditoBanco { get; set; }
+
+        [JsonPropertyName("items")]
+        public List<ItemFactura> Items { get; set; } = new List<ItemFactura>();
+
+        // Propiedades para UI
+        public string FormaPagoTexto => FormaPago == "EFECTIVO" ? "💵 Efectivo (33% desc.)" : "💳 Crédito Directo";
+        public string EstadoTexto => Estado == "PAGADA" ? "✅ Pagada" : "⏳ Pendiente";
+        public Color EstadoColor => Estado == "PAGADA" ? Utils.UIConstants.SUCCESS_COLOR : Utils.UIConstants.WARNING_COLOR;
+        public string TotalFormateado => $"${Total:F2}";
+        public string FechaFormateada => FechaFactura.Length > 10 ? FechaFactura.Substring(0, 10) : FechaFactura;
+        public string ResumenCredito => FormaPago == "CREDITO_DIRECTO" && NumeroCuotas.HasValue && CuotaMensual.HasValue ?
+            $"{NumeroCuotas.Value} cuotas de ${CuotaMensual.Value:F2}" : "N/A";
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+    }
+
+    public class ItemFactura : INotifyPropertyChanged
+    {
+        [JsonPropertyName("idElectrodomestico")]
+        public int IdElectrodomestico { get; set; }
+
+        [JsonPropertyName("nombre")]
+        public string Nombre { get; set; } = string.Empty;
+
+        [JsonPropertyName("marca")]
+        public string Marca { get; set; } = string.Empty;
+
+        [JsonPropertyName("cantidad")]
+        public int Cantidad { get; set; }
+
+        [JsonPropertyName("precioUnitario")]
+        public decimal PrecioUnitario { get; set; }
+
+        [JsonPropertyName("subtotal")]
+        public decimal Subtotal { get; set; }
+
+        // Para UI
+        public string DescripcionCompleta => $"{Nombre} ({Marca}) x {Cantidad}";
+        public string PrecioFormateado => $"${PrecioUnitario:F2}";
+        public string SubtotalFormateado => $"${Subtotal:F2}";
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+    }
+
+    public class RespuestaFactura
+    {
+        [JsonPropertyName("encontrada")]
+        public bool Encontrada { get; set; }
+
+        [JsonPropertyName("mensaje")]
+        public string Mensaje { get; set; } = string.Empty;
+
+        // Los datos vienen directamente en la respuesta
+        [JsonPropertyName("idFactura")]
+        public int IdFactura { get; set; }
+
+        [JsonPropertyName("numeroFactura")]
+        public string NumeroFactura { get; set; } = string.Empty;
+
+        [JsonPropertyName("cedulaCliente")]
+        public string CedulaCliente { get; set; } = string.Empty;
+
+        [JsonPropertyName("nombreCliente")]
+        public string NombreCliente { get; set; } = string.Empty;
+
+        [JsonPropertyName("fechaFactura")]
+        public string FechaFactura { get; set; } = string.Empty;
+
+        [JsonPropertyName("subtotal")]
+        public decimal Subtotal { get; set; }
+
+        [JsonPropertyName("descuento")]
+        public decimal Descuento { get; set; }
+
+        [JsonPropertyName("total")]
+        public decimal Total { get; set; }
+
+        [JsonPropertyName("formaPago")]
+        public string FormaPago { get; set; } = string.Empty;
+
+        [JsonPropertyName("estado")]
+        public string Estado { get; set; } = string.Empty;
+
+        [JsonPropertyName("numeroCuotas")]
+        public int? NumeroCuotas { get; set; }
+
+        [JsonPropertyName("cuotaMensual")]
+        public decimal? CuotaMensual { get; set; }
+
+        [JsonPropertyName("idCreditoBanco")]
+        public int? IdCreditoBanco { get; set; }
+
+        [JsonPropertyName("items")]
+        public List<ItemFactura> Items { get; set; } = new List<ItemFactura>();
+
+        public Factura ToFactura()
+        {
+            return new Factura
+            {
+                IdFactura = this.IdFactura,
+                NumeroFactura = this.NumeroFactura,
+                CedulaCliente = this.CedulaCliente,
+                NombreCliente = this.NombreCliente,
+                FechaFactura = this.FechaFactura,
+                Subtotal = this.Subtotal,
+                Descuento = this.Descuento,
+                Total = this.Total,
+                FormaPago = this.FormaPago,
+                Estado = this.Estado,
+                NumeroCuotas = this.NumeroCuotas,
+                CuotaMensual = this.CuotaMensual,
+                IdCreditoBanco = this.IdCreditoBanco,
+                Items = this.Items
+            };
+        }
+    }
 
     public class SolicitudVenta
     {
@@ -363,8 +529,8 @@ namespace ClienteMovil.Models
         // REST Endpoints (Java) - idénticos al cliente de escritorio
         public static class REST
         {
-            public const string BASE_COMERCIALIZADORA = "http://192.168.1.4:8080/ComercializadoraElectrodomesticos/api";
-            public const string BASE_BANQUITO = "http://192.168.1.4:8080/BanquitoCore/api/credito";
+            public const string BASE_COMERCIALIZADORA = "http://10.40.33.61:8080/ComercializadoraElectrodomesticos/api";
+            public const string BASE_BANQUITO = "http://10.40.33.61:8080/BanquitoCore/api/credito";
 
             // Electrodomésticos
             public const string ELECTRODOMESTICOS = BASE_COMERCIALIZADORA + "/electrodomesticos";
@@ -374,6 +540,10 @@ namespace ClienteMovil.Models
             public const string VENTA_EFECTIVO = BASE_COMERCIALIZADORA + "/facturacion/venta-efectivo";
             public const string VENTA_CREDITO = BASE_COMERCIALIZADORA + "/facturacion/venta-credito";
             public static string TablaAmortizacionFactura(int idFactura) => $"{BASE_COMERCIALIZADORA}/facturacion/tabla-amortizacion/{idFactura}";
+
+            public const string FACTURAS = BASE_COMERCIALIZADORA + "/facturacion/facturas";
+            public static string FacturaPorId(int id) => $"{BASE_COMERCIALIZADORA}/facturacion/facturas/{id}";
+
 
             // BanQuito
             public static string ValidarCredito(string cedula) => $"{BASE_BANQUITO}/validar/{cedula}";

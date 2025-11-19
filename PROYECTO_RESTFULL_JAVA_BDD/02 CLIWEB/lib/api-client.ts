@@ -1,5 +1,5 @@
-const BASE_COMERCIALIZADORA = "http://localhost:8080/ComercializadoraElectrodomesticos/api";
-const BASE_BANQUITO = "http://localhost:8080/BanquitoCore/api/credito";
+const BASE_COMERCIALIZADORA = "http://10.40.33.61:8080/ComercializadoraElectrodomesticos/api";
+const BASE_BANQUITO = "http://10.40.33.61:8080/BanquitoCore/api/credito";
 
 export type TipoProtocolo = "REST" | "SOAP";
 
@@ -101,6 +101,62 @@ export class ClienteUnificado {
       return testBanquito && testComercializadora;
     } catch {
       return false;
+    }
+  }
+
+  async listarFacturas() {
+    if (this.protocoloActual === "REST") {
+      return this.listarFacturasREST();
+    }
+    throw new Error("SOAP no implementado aún");
+  }
+
+  async obtenerFactura(idFactura: number) {
+    if (this.protocoloActual === "REST") {
+      return this.obtenerFacturaREST(idFactura);
+    }
+    throw new Error("SOAP no implementado aún");
+  }
+
+  // ========== IMPLEMENTACIONES REST ==========
+
+  private async listarFacturasREST() {
+    try {
+      const response = await fetch(`${BASE_COMERCIALIZADORA}/facturacion/facturas`, {
+        method: "GET",
+      });
+      if (response.ok) {
+        return await response.json();
+      }
+      return [];
+    } catch (error) {
+      console.error("Error al listar facturas:", error);
+      return [];
+    }
+  }
+
+  private async obtenerFacturaREST(idFactura: number) {
+    try {
+      const response = await fetch(`${BASE_COMERCIALIZADORA}/facturacion/facturas/${idFactura}`, {
+        method: "GET",
+      });
+      if (response.ok) {
+        const data = await response.json();
+        return {
+          encontrada: true,
+          mensaje: "Factura obtenida exitosamente",
+          ...data
+        };
+      }
+      return {
+        encontrada: false,
+        mensaje: "Factura no encontrada"
+      };
+    } catch (error) {
+      return {
+        encontrada: false,
+        mensaje: `Error de conexión: ${error}`
+      };
     }
   }
 
