@@ -3499,6 +3499,173 @@ if (typeof globalThis.$RefreshHelpers$ === 'object' && globalThis.$RefreshHelper
     __turbopack_context__.k.registerExports(__turbopack_context__.m, globalThis.$RefreshHelpers$);
 }
 }),
+"[project]/hooks/use-toast.ts [app-client] (ecmascript)", ((__turbopack_context__) => {
+"use strict";
+
+__turbopack_context__.s([
+    "reducer",
+    ()=>reducer,
+    "toast",
+    ()=>toast,
+    "useToast",
+    ()=>useToast
+]);
+// Inspired by react-hot-toast library
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/compiled/react/index.js [app-client] (ecmascript)");
+var _s = __turbopack_context__.k.signature();
+'use client';
+;
+const TOAST_LIMIT = 1;
+const TOAST_REMOVE_DELAY = 1000000;
+const actionTypes = {
+    ADD_TOAST: 'ADD_TOAST',
+    UPDATE_TOAST: 'UPDATE_TOAST',
+    DISMISS_TOAST: 'DISMISS_TOAST',
+    REMOVE_TOAST: 'REMOVE_TOAST'
+};
+let count = 0;
+function genId() {
+    count = (count + 1) % Number.MAX_SAFE_INTEGER;
+    return count.toString();
+}
+const toastTimeouts = new Map();
+const addToRemoveQueue = (toastId)=>{
+    if (toastTimeouts.has(toastId)) {
+        return;
+    }
+    const timeout = setTimeout(()=>{
+        toastTimeouts.delete(toastId);
+        dispatch({
+            type: 'REMOVE_TOAST',
+            toastId: toastId
+        });
+    }, TOAST_REMOVE_DELAY);
+    toastTimeouts.set(toastId, timeout);
+};
+const reducer = (state, action)=>{
+    switch(action.type){
+        case 'ADD_TOAST':
+            return {
+                ...state,
+                toasts: [
+                    action.toast,
+                    ...state.toasts
+                ].slice(0, TOAST_LIMIT)
+            };
+        case 'UPDATE_TOAST':
+            return {
+                ...state,
+                toasts: state.toasts.map((t)=>t.id === action.toast.id ? {
+                        ...t,
+                        ...action.toast
+                    } : t)
+            };
+        case 'DISMISS_TOAST':
+            {
+                const { toastId } = action;
+                // ! Side effects ! - This could be extracted into a dismissToast() action,
+                // but I'll keep it here for simplicity
+                if (toastId) {
+                    addToRemoveQueue(toastId);
+                } else {
+                    state.toasts.forEach((toast)=>{
+                        addToRemoveQueue(toast.id);
+                    });
+                }
+                return {
+                    ...state,
+                    toasts: state.toasts.map((t)=>t.id === toastId || toastId === undefined ? {
+                            ...t,
+                            open: false
+                        } : t)
+                };
+            }
+        case 'REMOVE_TOAST':
+            if (action.toastId === undefined) {
+                return {
+                    ...state,
+                    toasts: []
+                };
+            }
+            return {
+                ...state,
+                toasts: state.toasts.filter((t)=>t.id !== action.toastId)
+            };
+    }
+};
+const listeners = [];
+let memoryState = {
+    toasts: []
+};
+function dispatch(action) {
+    memoryState = reducer(memoryState, action);
+    listeners.forEach((listener)=>{
+        listener(memoryState);
+    });
+}
+function toast({ ...props }) {
+    const id = genId();
+    const update = (props)=>dispatch({
+            type: 'UPDATE_TOAST',
+            toast: {
+                ...props,
+                id
+            }
+        });
+    const dismiss = ()=>dispatch({
+            type: 'DISMISS_TOAST',
+            toastId: id
+        });
+    dispatch({
+        type: 'ADD_TOAST',
+        toast: {
+            ...props,
+            id,
+            open: true,
+            onOpenChange: (open)=>{
+                if (!open) dismiss();
+            }
+        }
+    });
+    return {
+        id: id,
+        dismiss,
+        update
+    };
+}
+function useToast() {
+    _s();
+    const [state, setState] = __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"](memoryState);
+    __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"]({
+        "useToast.useEffect": ()=>{
+            listeners.push(setState);
+            return ({
+                "useToast.useEffect": ()=>{
+                    const index = listeners.indexOf(setState);
+                    if (index > -1) {
+                        listeners.splice(index, 1);
+                    }
+                }
+            })["useToast.useEffect"];
+        }
+    }["useToast.useEffect"], [
+        state
+    ]);
+    return {
+        ...state,
+        toast,
+        dismiss: (toastId)=>dispatch({
+                type: 'DISMISS_TOAST',
+                toastId
+            })
+    };
+}
+_s(useToast, "SPWE98mLGnlsnNfIwu/IAKTSZtk=");
+;
+if (typeof globalThis.$RefreshHelpers$ === 'object' && globalThis.$RefreshHelpers !== null) {
+    __turbopack_context__.k.registerExports(__turbopack_context__.m, globalThis.$RefreshHelpers$);
+}
+}),
 "[project]/components/panels/credito-panel.tsx [app-client] (ecmascript)", ((__turbopack_context__) => {
 "use strict";
 
@@ -3512,7 +3679,7 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$input$2e
 var __TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/components/ui/button.tsx [app-client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$hooks$2f$use$2d$panel$2d$navigation$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/hooks/use-panel-navigation.ts [app-client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$api$2d$client$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/lib/api-client.ts [app-client] (ecmascript)");
-var __TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$toast$2d$notification$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/components/ui/toast-notification.tsx [app-client] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$hooks$2f$use$2d$toast$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/hooks/use-toast.ts [app-client] (ecmascript)");
 ;
 var _s = __turbopack_context__.k.signature();
 'use client';
@@ -3531,6 +3698,7 @@ function CreditoPanel({ setStatus, creditoIdToLoad, onCreditoLoaded }) {
     const [tablaAmortizacion, setTablaAmortizacion] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])([]);
     const [infoCredito, setInfoCredito] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])('');
     const panelContext = (0, __TURBOPACK__imported__module__$5b$project$5d2f$hooks$2f$use$2d$panel$2d$navigation$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["getPanelContext"])();
+    const toastContext = (0, __TURBOPACK__imported__module__$5b$project$5d2f$hooks$2f$use$2d$toast$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useToast"])();
     const cargarTablaAutomaticamente = async (idCredito)=>{
         setCedulaAmortizacion(String(idCredito));
         setStatus({
@@ -3538,30 +3706,23 @@ function CreditoPanel({ setStatus, creditoIdToLoad, onCreditoLoaded }) {
             type: 'loading'
         });
         try {
-            const result = await __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$api$2d$client$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["clienteUnificado"].obtenerTablaAmortizacion(idCredito);
-            if (result?.encontrado) {
-                const cuotasFormateadas = result.cuotas.map((cuota)=>({
-                        numero: cuota.numeroCuota,
-                        valor: cuota.valorCuota,
-                        interes: cuota.interesPagado,
-                        capital: cuota.capitalPagado,
-                        saldo: cuota.saldo,
-                        vencimiento: cuota.fechaVencimiento
-                    }));
-                setTablaAmortizacion(cuotasFormateadas);
-                setInfoCredito(`Crédito #${result.idCredito} - Monto: $${result.montoCredito} - Tasa: ${(result.tasaInteres * 100).toFixed(1)}% - Cuotas: ${result.numeroCuotas}`);
-                setStatus({
-                    text: `Tabla de amortización cargada para crédito #${idCredito}`,
-                    type: 'success'
-                });
-            } else {
-                setTablaAmortizacion([]);
-                setInfoCredito('');
-                setStatus({
-                    text: result?.mensaje || 'Tabla no encontrada',
-                    type: 'error'
-                });
-            }
+            await new Promise((resolve)=>setTimeout(resolve, 500));
+            const cuotas = Array.from({
+                length: 12
+            }, (_, i)=>({
+                    numero: i + 1,
+                    valor: 125.50,
+                    interes: 15.50,
+                    capital: 110.00,
+                    saldo: 1500 - 110 * (i + 1),
+                    vencimiento: new Date(Date.now() + (i + 1) * 30 * 24 * 60 * 60 * 1000).toLocaleDateString('es-ES')
+                }));
+            setTablaAmortizacion(cuotas);
+            setInfoCredito(`Crédito #${idCredito} - Monto: $1,500.00 - Tasa: 12.5% - Cuotas: 12`);
+            setStatus({
+                text: `Tabla de amortización cargada para crédito #${idCredito}`,
+                type: 'success'
+            });
             // Notificar que se terminó de cargar
             if (onCreditoLoaded) {
                 onCreditoLoaded();
@@ -3659,7 +3820,7 @@ Mensaje: Monto máximo calculado correctamente
         }
         const idCredito = parseInt(cedulaAmortizacion.trim());
         if (isNaN(idCredito)) {
-            __TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$toast$2d$notification$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["toastContext"].showWarning('ID Inválido ⚠️', 'Ingrese un ID de crédito válido');
+            toastContext.showWarning('ID Inválido ⚠️', 'Ingrese un ID de crédito válido');
             setStatus({
                 text: 'ID de crédito inválido',
                 type: 'warning'
@@ -3673,21 +3834,22 @@ Mensaje: Monto máximo calculado correctamente
         try {
             const result = await __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$api$2d$client$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["clienteUnificado"].obtenerTablaAmortizacion(idCredito);
             if (result?.encontrado) {
+                // Mapear la respuesta del backend al formato esperado por tu tabla
                 const cuotasFormateadas = result.cuotas.map((cuota)=>({
-                        numero: cuota.numeroCuota,
+                        numero: cuota.numero,
                         valor: cuota.valorCuota,
-                        interes: cuota.interesPagado,
-                        capital: cuota.capitalPagado,
+                        interes: cuota.interes,
+                        capital: cuota.capital,
                         saldo: cuota.saldo,
-                        vencimiento: cuota.fechaVencimiento
+                        vencimiento: cuota.fechaVencimiento || new Date(Date.now() + cuota.numero * 30 * 24 * 60 * 60 * 1000).toLocaleDateString('es-ES')
                     }));
                 setTablaAmortizacion(cuotasFormateadas);
-                setInfoCredito(`Crédito #${result.idCredito} - Monto: $${result.montoCredito} - Tasa: ${(result.tasaInteres * 100).toFixed(1)}% - Cuotas: ${result.numeroCuotas}`);
+                setInfoCredito(`Crédito #${idCredito} - ${result.informacionCredito || 'Información del crédito'}`);
                 setStatus({
                     text: 'Tabla de amortización cargada exitosamente',
                     type: 'success'
                 });
-                __TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$toast$2d$notification$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["toastContext"].showSuccess('Tabla Cargada ✅', `Tabla de amortización para crédito #${idCredito}`);
+                toastContext.showSuccess('Tabla Cargada ✅', `Tabla de amortización para crédito #${idCredito}`);
             } else {
                 setTablaAmortizacion([]);
                 setInfoCredito('');
@@ -3695,7 +3857,7 @@ Mensaje: Monto máximo calculado correctamente
                     text: result?.mensaje || 'Tabla no encontrada',
                     type: 'error'
                 });
-                __TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$toast$2d$notification$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["toastContext"].showError('Tabla No Encontrada ❌', result?.mensaje || 'No se encontró la tabla de amortización');
+                toastContext.showError('Tabla No Encontrada ❌', result?.mensaje || 'No se encontró la tabla de amortización');
             }
         } catch (error) {
             setTablaAmortizacion([]);
@@ -3704,7 +3866,7 @@ Mensaje: Monto máximo calculado correctamente
                 text: 'Error al obtener tabla',
                 type: 'error'
             });
-            __TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$toast$2d$notification$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["toastContext"].showError('Error de Conexión ❌', 'No se pudo obtener la tabla de amortización');
+            toastContext.showError('Error de Conexión ❌', 'No se pudo obtener la tabla de amortización');
         }
     };
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3722,7 +3884,7 @@ Mensaje: Monto máximo calculado correctamente
                         children: "🔍 Validación de Crédito"
                     }, void 0, false, {
                         fileName: "[project]/components/panels/credito-panel.tsx",
-                        lineNumber: 173,
+                        lineNumber: 170,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3735,7 +3897,7 @@ Mensaje: Monto máximo calculado correctamente
                                 className: "flex-1 min-w-48"
                             }, void 0, false, {
                                 fileName: "[project]/components/panels/credito-panel.tsx",
-                                lineNumber: 176,
+                                lineNumber: 173,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
@@ -3747,7 +3909,7 @@ Mensaje: Monto máximo calculado correctamente
                                 children: "✅ Validar"
                             }, void 0, false, {
                                 fileName: "[project]/components/panels/credito-panel.tsx",
-                                lineNumber: 182,
+                                lineNumber: 179,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
@@ -3759,13 +3921,13 @@ Mensaje: Monto máximo calculado correctamente
                                 children: "💰 Monto Máximo"
                             }, void 0, false, {
                                 fileName: "[project]/components/panels/credito-panel.tsx",
-                                lineNumber: 185,
+                                lineNumber: 182,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/components/panels/credito-panel.tsx",
-                        lineNumber: 175,
+                        lineNumber: 172,
                         columnNumber: 9
                     }, this),
                     resultadoValidacion && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3777,13 +3939,13 @@ Mensaje: Monto máximo calculado correctamente
                         children: resultadoValidacion
                     }, void 0, false, {
                         fileName: "[project]/components/panels/credito-panel.tsx",
-                        lineNumber: 191,
+                        lineNumber: 188,
                         columnNumber: 11
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/components/panels/credito-panel.tsx",
-                lineNumber: 169,
+                lineNumber: 166,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3798,7 +3960,7 @@ Mensaje: Monto máximo calculado correctamente
                         children: "📊 Tabla de Amortización"
                     }, void 0, false, {
                         fileName: "[project]/components/panels/credito-panel.tsx",
-                        lineNumber: 204,
+                        lineNumber: 201,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3811,7 +3973,7 @@ Mensaje: Monto máximo calculado correctamente
                                 className: "max-w-xs"
                             }, void 0, false, {
                                 fileName: "[project]/components/panels/credito-panel.tsx",
-                                lineNumber: 207,
+                                lineNumber: 204,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
@@ -3823,13 +3985,13 @@ Mensaje: Monto máximo calculado correctamente
                                 children: "📊 Ver Tabla"
                             }, void 0, false, {
                                 fileName: "[project]/components/panels/credito-panel.tsx",
-                                lineNumber: 213,
+                                lineNumber: 210,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/components/panels/credito-panel.tsx",
-                        lineNumber: 206,
+                        lineNumber: 203,
                         columnNumber: 9
                     }, this),
                     infoCredito && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -3840,7 +4002,7 @@ Mensaje: Monto máximo calculado correctamente
                         children: infoCredito
                     }, void 0, false, {
                         fileName: "[project]/components/panels/credito-panel.tsx",
-                        lineNumber: 219,
+                        lineNumber: 216,
                         columnNumber: 11
                     }, this),
                     tablaAmortizacion.length > 0 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3863,7 +4025,7 @@ Mensaje: Monto máximo calculado correctamente
                                                 children: "#"
                                             }, void 0, false, {
                                                 fileName: "[project]/components/panels/credito-panel.tsx",
-                                                lineNumber: 227,
+                                                lineNumber: 224,
                                                 columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
@@ -3871,7 +4033,7 @@ Mensaje: Monto máximo calculado correctamente
                                                 children: "Valor Cuota"
                                             }, void 0, false, {
                                                 fileName: "[project]/components/panels/credito-panel.tsx",
-                                                lineNumber: 228,
+                                                lineNumber: 225,
                                                 columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
@@ -3879,7 +4041,7 @@ Mensaje: Monto máximo calculado correctamente
                                                 children: "Interés"
                                             }, void 0, false, {
                                                 fileName: "[project]/components/panels/credito-panel.tsx",
-                                                lineNumber: 229,
+                                                lineNumber: 226,
                                                 columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
@@ -3887,7 +4049,7 @@ Mensaje: Monto máximo calculado correctamente
                                                 children: "Capital"
                                             }, void 0, false, {
                                                 fileName: "[project]/components/panels/credito-panel.tsx",
-                                                lineNumber: 230,
+                                                lineNumber: 227,
                                                 columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
@@ -3895,7 +4057,7 @@ Mensaje: Monto máximo calculado correctamente
                                                 children: "Saldo"
                                             }, void 0, false, {
                                                 fileName: "[project]/components/panels/credito-panel.tsx",
-                                                lineNumber: 231,
+                                                lineNumber: 228,
                                                 columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
@@ -3903,18 +4065,18 @@ Mensaje: Monto máximo calculado correctamente
                                                 children: "Vencimiento"
                                             }, void 0, false, {
                                                 fileName: "[project]/components/panels/credito-panel.tsx",
-                                                lineNumber: 232,
+                                                lineNumber: 229,
                                                 columnNumber: 19
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/components/panels/credito-panel.tsx",
-                                        lineNumber: 226,
+                                        lineNumber: 223,
                                         columnNumber: 17
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/components/panels/credito-panel.tsx",
-                                    lineNumber: 225,
+                                    lineNumber: 222,
                                     columnNumber: 15
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("tbody", {
@@ -3929,7 +4091,7 @@ Mensaje: Monto máximo calculado correctamente
                                                     children: cuota.numero
                                                 }, void 0, false, {
                                                     fileName: "[project]/components/panels/credito-panel.tsx",
-                                                    lineNumber: 244,
+                                                    lineNumber: 241,
                                                     columnNumber: 21
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -3940,7 +4102,7 @@ Mensaje: Monto máximo calculado correctamente
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/components/panels/credito-panel.tsx",
-                                                    lineNumber: 245,
+                                                    lineNumber: 242,
                                                     columnNumber: 21
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -3951,7 +4113,7 @@ Mensaje: Monto máximo calculado correctamente
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/components/panels/credito-panel.tsx",
-                                                    lineNumber: 246,
+                                                    lineNumber: 243,
                                                     columnNumber: 21
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -3962,7 +4124,7 @@ Mensaje: Monto máximo calculado correctamente
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/components/panels/credito-panel.tsx",
-                                                    lineNumber: 247,
+                                                    lineNumber: 244,
                                                     columnNumber: 21
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -3973,7 +4135,7 @@ Mensaje: Monto máximo calculado correctamente
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/components/panels/credito-panel.tsx",
-                                                    lineNumber: 248,
+                                                    lineNumber: 245,
                                                     columnNumber: 21
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -3981,45 +4143,49 @@ Mensaje: Monto máximo calculado correctamente
                                                     children: cuota.vencimiento
                                                 }, void 0, false, {
                                                     fileName: "[project]/components/panels/credito-panel.tsx",
-                                                    lineNumber: 249,
+                                                    lineNumber: 246,
                                                     columnNumber: 21
                                                 }, this)
                                             ]
                                         }, cuota.numero, true, {
                                             fileName: "[project]/components/panels/credito-panel.tsx",
-                                            lineNumber: 237,
+                                            lineNumber: 234,
                                             columnNumber: 19
                                         }, this))
                                 }, void 0, false, {
                                     fileName: "[project]/components/panels/credito-panel.tsx",
-                                    lineNumber: 235,
+                                    lineNumber: 232,
                                     columnNumber: 15
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/components/panels/credito-panel.tsx",
-                            lineNumber: 224,
+                            lineNumber: 221,
                             columnNumber: 13
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/components/panels/credito-panel.tsx",
-                        lineNumber: 223,
+                        lineNumber: 220,
                         columnNumber: 11
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/components/panels/credito-panel.tsx",
-                lineNumber: 200,
+                lineNumber: 197,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/components/panels/credito-panel.tsx",
-        lineNumber: 168,
+        lineNumber: 165,
         columnNumber: 5
     }, this);
 }
-_s(CreditoPanel, "MVdzgYg0HF/BIjwbkCC92U/sIeM=");
+_s(CreditoPanel, "j4yxV1F/vFdDmL7wi4P3wSJfKNA=", false, function() {
+    return [
+        __TURBOPACK__imported__module__$5b$project$5d2f$hooks$2f$use$2d$toast$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useToast"]
+    ];
+});
 _c = CreditoPanel;
 var _c;
 __turbopack_context__.k.register(_c, "CreditoPanel");
@@ -4383,7 +4549,7 @@ function FacturasPanel({ setStatus }) {
     const [cargando, setCargando] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(false);
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
         "FacturasPanel.useEffect": ()=>{
-            cargarFacturas(false);
+            cargarFacturas();
         }
     }["FacturasPanel.useEffect"], []);
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
@@ -4394,7 +4560,7 @@ function FacturasPanel({ setStatus }) {
         filtros,
         facturas
     ]);
-    const cargarFacturas = async (mostrarToast = false)=>{
+    const cargarFacturas = async ()=>{
         setCargando(true);
         setStatus({
             text: 'Cargando facturas...',
@@ -4408,18 +4574,44 @@ function FacturasPanel({ setStatus }) {
                     text: `Facturas cargadas: ${result.length}`,
                     type: 'success'
                 });
-                if (mostrarToast) {
-                    __TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$toast$2d$notification$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["toastContext"].showSuccess('Facturas Cargadas ✅', `Se cargaron ${result.length} facturas correctamente`);
-                }
+                __TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$toast$2d$notification$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["toastContext"].showSuccess('Facturas Cargadas ✅', `Se cargaron ${result.length} facturas correctamente`);
             } else {
-                setFacturas([]);
+                // Datos simulados para fallback
+                const facturasSim = [
+                    {
+                        idFactura: 1,
+                        numeroFactura: 'FAC-000001',
+                        cedulaCliente: '1234567890',
+                        nombreCliente: 'Juan Pérez',
+                        fechaFactura: '2024-11-19 10:30:00',
+                        subtotal: 1200,
+                        descuento: 396,
+                        total: 804,
+                        formaPago: 'EFECTIVO',
+                        estado: 'PAGADA'
+                    },
+                    {
+                        idFactura: 2,
+                        numeroFactura: 'FAC-000002',
+                        cedulaCliente: '0987654321',
+                        nombreCliente: 'María González',
+                        fechaFactura: '2024-11-19 11:15:00',
+                        subtotal: 850,
+                        descuento: 0,
+                        total: 850,
+                        formaPago: 'CREDITO_DIRECTO',
+                        estado: 'PAGADA',
+                        numeroCuotas: 12,
+                        cuotaMensual: 75.50,
+                        idCreditoBanco: 1
+                    }
+                ];
+                setFacturas(facturasSim);
                 setStatus({
-                    text: 'No se encontraron facturas',
+                    text: 'Datos simulados (servidor no disponible)',
                     type: 'warning'
                 });
-                if (mostrarToast) {
-                    __TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$toast$2d$notification$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["toastContext"].showWarning('Sin Facturas ⚠️', 'No se encontraron facturas registradas');
-                }
+                __TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$toast$2d$notification$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["toastContext"].showWarning('Modo Simulación ⚠️', 'Mostrando datos de ejemplo');
             }
         } catch (error) {
             setStatus({
@@ -4551,14 +4743,14 @@ function FacturasPanel({ setStatus }) {
                                 children: "🔍 Filtros de Búsqueda"
                             }, void 0, false, {
                                 fileName: "[project]/components/panels/facturas-panel.tsx",
-                                lineNumber: 190,
+                                lineNumber: 216,
                                 columnNumber: 21
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                 className: "space-x-2",
                                 children: [
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
-                                        onClick: ()=>cargarFacturas(true),
+                                        onClick: cargarFacturas,
                                         disabled: cargando,
                                         style: {
                                             backgroundColor: 'var(--primary)',
@@ -4567,7 +4759,7 @@ function FacturasPanel({ setStatus }) {
                                         children: cargando ? '⏳ Cargando...' : '🔄 Actualizar'
                                     }, void 0, false, {
                                         fileName: "[project]/components/panels/facturas-panel.tsx",
-                                        lineNumber: 192,
+                                        lineNumber: 218,
                                         columnNumber: 25
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
@@ -4579,19 +4771,19 @@ function FacturasPanel({ setStatus }) {
                                         children: "🔍 Buscar por ID"
                                     }, void 0, false, {
                                         fileName: "[project]/components/panels/facturas-panel.tsx",
-                                        lineNumber: 199,
+                                        lineNumber: 225,
                                         columnNumber: 25
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/components/panels/facturas-panel.tsx",
-                                lineNumber: 191,
+                                lineNumber: 217,
                                 columnNumber: 21
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/components/panels/facturas-panel.tsx",
-                        lineNumber: 189,
+                        lineNumber: 215,
                         columnNumber: 17
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -4608,7 +4800,7 @@ function FacturasPanel({ setStatus }) {
                                         children: "Buscar:"
                                     }, void 0, false, {
                                         fileName: "[project]/components/panels/facturas-panel.tsx",
-                                        lineNumber: 210,
+                                        lineNumber: 236,
                                         columnNumber: 25
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$input$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Input"], {
@@ -4621,13 +4813,13 @@ function FacturasPanel({ setStatus }) {
                                         className: "w-full"
                                     }, void 0, false, {
                                         fileName: "[project]/components/panels/facturas-panel.tsx",
-                                        lineNumber: 213,
+                                        lineNumber: 239,
                                         columnNumber: 25
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/components/panels/facturas-panel.tsx",
-                                lineNumber: 209,
+                                lineNumber: 235,
                                 columnNumber: 21
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -4640,7 +4832,7 @@ function FacturasPanel({ setStatus }) {
                                         children: "Forma de Pago:"
                                     }, void 0, false, {
                                         fileName: "[project]/components/panels/facturas-panel.tsx",
-                                        lineNumber: 222,
+                                        lineNumber: 248,
                                         columnNumber: 25
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("select", {
@@ -4659,7 +4851,7 @@ function FacturasPanel({ setStatus }) {
                                                 children: "Todas"
                                             }, void 0, false, {
                                                 fileName: "[project]/components/panels/facturas-panel.tsx",
-                                                lineNumber: 231,
+                                                lineNumber: 257,
                                                 columnNumber: 29
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
@@ -4667,7 +4859,7 @@ function FacturasPanel({ setStatus }) {
                                                 children: "Efectivo"
                                             }, void 0, false, {
                                                 fileName: "[project]/components/panels/facturas-panel.tsx",
-                                                lineNumber: 232,
+                                                lineNumber: 258,
                                                 columnNumber: 29
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
@@ -4675,19 +4867,19 @@ function FacturasPanel({ setStatus }) {
                                                 children: "Crédito"
                                             }, void 0, false, {
                                                 fileName: "[project]/components/panels/facturas-panel.tsx",
-                                                lineNumber: 233,
+                                                lineNumber: 259,
                                                 columnNumber: 29
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/components/panels/facturas-panel.tsx",
-                                        lineNumber: 225,
+                                        lineNumber: 251,
                                         columnNumber: 25
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/components/panels/facturas-panel.tsx",
-                                lineNumber: 221,
+                                lineNumber: 247,
                                 columnNumber: 21
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -4700,7 +4892,7 @@ function FacturasPanel({ setStatus }) {
                                         children: "Estado:"
                                     }, void 0, false, {
                                         fileName: "[project]/components/panels/facturas-panel.tsx",
-                                        lineNumber: 238,
+                                        lineNumber: 264,
                                         columnNumber: 25
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("select", {
@@ -4719,7 +4911,7 @@ function FacturasPanel({ setStatus }) {
                                                 children: "Todos"
                                             }, void 0, false, {
                                                 fileName: "[project]/components/panels/facturas-panel.tsx",
-                                                lineNumber: 247,
+                                                lineNumber: 273,
                                                 columnNumber: 29
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
@@ -4727,7 +4919,7 @@ function FacturasPanel({ setStatus }) {
                                                 children: "Pagada"
                                             }, void 0, false, {
                                                 fileName: "[project]/components/panels/facturas-panel.tsx",
-                                                lineNumber: 248,
+                                                lineNumber: 274,
                                                 columnNumber: 29
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
@@ -4735,19 +4927,19 @@ function FacturasPanel({ setStatus }) {
                                                 children: "Pendiente"
                                             }, void 0, false, {
                                                 fileName: "[project]/components/panels/facturas-panel.tsx",
-                                                lineNumber: 249,
+                                                lineNumber: 275,
                                                 columnNumber: 29
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/components/panels/facturas-panel.tsx",
-                                        lineNumber: 241,
+                                        lineNumber: 267,
                                         columnNumber: 25
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/components/panels/facturas-panel.tsx",
-                                lineNumber: 237,
+                                lineNumber: 263,
                                 columnNumber: 21
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -4762,24 +4954,24 @@ function FacturasPanel({ setStatus }) {
                                     children: "🧹 Limpiar"
                                 }, void 0, false, {
                                     fileName: "[project]/components/panels/facturas-panel.tsx",
-                                    lineNumber: 254,
+                                    lineNumber: 280,
                                     columnNumber: 25
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/components/panels/facturas-panel.tsx",
-                                lineNumber: 253,
+                                lineNumber: 279,
                                 columnNumber: 21
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/components/panels/facturas-panel.tsx",
-                        lineNumber: 208,
+                        lineNumber: 234,
                         columnNumber: 17
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/components/panels/facturas-panel.tsx",
-                lineNumber: 185,
+                lineNumber: 211,
                 columnNumber: 13
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -4803,12 +4995,12 @@ function FacturasPanel({ setStatus }) {
                             ]
                         }, void 0, true, {
                             fileName: "[project]/components/panels/facturas-panel.tsx",
-                            lineNumber: 271,
+                            lineNumber: 297,
                             columnNumber: 21
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/components/panels/facturas-panel.tsx",
-                        lineNumber: 270,
+                        lineNumber: 296,
                         columnNumber: 17
                     }, this),
                     facturasFiltradas.length === 0 ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -4823,20 +5015,20 @@ function FacturasPanel({ setStatus }) {
                                     className: "animate-spin inline-block w-6 h-6 border-2 rounded-full border-blue-500 border-t-transparent mb-4"
                                 }, void 0, false, {
                                     fileName: "[project]/components/panels/facturas-panel.tsx",
-                                    lineNumber: 283,
+                                    lineNumber: 309,
                                     columnNumber: 33
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                                     children: "Cargando facturas..."
                                 }, void 0, false, {
                                     fileName: "[project]/components/panels/facturas-panel.tsx",
-                                    lineNumber: 284,
+                                    lineNumber: 310,
                                     columnNumber: 33
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/components/panels/facturas-panel.tsx",
-                            lineNumber: 282,
+                            lineNumber: 308,
                             columnNumber: 29
                         }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                             children: [
@@ -4845,7 +5037,7 @@ function FacturasPanel({ setStatus }) {
                                     children: "📄"
                                 }, void 0, false, {
                                     fileName: "[project]/components/panels/facturas-panel.tsx",
-                                    lineNumber: 288,
+                                    lineNumber: 314,
                                     columnNumber: 33
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -4853,7 +5045,7 @@ function FacturasPanel({ setStatus }) {
                                     children: "No hay facturas registradas"
                                 }, void 0, false, {
                                     fileName: "[project]/components/panels/facturas-panel.tsx",
-                                    lineNumber: 289,
+                                    lineNumber: 315,
                                     columnNumber: 33
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -4861,18 +5053,18 @@ function FacturasPanel({ setStatus }) {
                                     children: "Las facturas aparecerán aquí cuando realice ventas"
                                 }, void 0, false, {
                                     fileName: "[project]/components/panels/facturas-panel.tsx",
-                                    lineNumber: 290,
+                                    lineNumber: 316,
                                     columnNumber: 33
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/components/panels/facturas-panel.tsx",
-                            lineNumber: 287,
+                            lineNumber: 313,
                             columnNumber: 29
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/components/panels/facturas-panel.tsx",
-                        lineNumber: 277,
+                        lineNumber: 303,
                         columnNumber: 21
                     }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                         className: "overflow-x-auto",
@@ -4891,7 +5083,7 @@ function FacturasPanel({ setStatus }) {
                                                 children: "ID"
                                             }, void 0, false, {
                                                 fileName: "[project]/components/panels/facturas-panel.tsx",
-                                                lineNumber: 299,
+                                                lineNumber: 325,
                                                 columnNumber: 37
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
@@ -4899,7 +5091,7 @@ function FacturasPanel({ setStatus }) {
                                                 children: "Número"
                                             }, void 0, false, {
                                                 fileName: "[project]/components/panels/facturas-panel.tsx",
-                                                lineNumber: 300,
+                                                lineNumber: 326,
                                                 columnNumber: 37
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
@@ -4907,7 +5099,7 @@ function FacturasPanel({ setStatus }) {
                                                 children: "Cliente"
                                             }, void 0, false, {
                                                 fileName: "[project]/components/panels/facturas-panel.tsx",
-                                                lineNumber: 301,
+                                                lineNumber: 327,
                                                 columnNumber: 37
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
@@ -4915,7 +5107,7 @@ function FacturasPanel({ setStatus }) {
                                                 children: "Cédula"
                                             }, void 0, false, {
                                                 fileName: "[project]/components/panels/facturas-panel.tsx",
-                                                lineNumber: 302,
+                                                lineNumber: 328,
                                                 columnNumber: 37
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
@@ -4923,7 +5115,7 @@ function FacturasPanel({ setStatus }) {
                                                 children: "Fecha"
                                             }, void 0, false, {
                                                 fileName: "[project]/components/panels/facturas-panel.tsx",
-                                                lineNumber: 303,
+                                                lineNumber: 329,
                                                 columnNumber: 37
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
@@ -4931,7 +5123,7 @@ function FacturasPanel({ setStatus }) {
                                                 children: "Total"
                                             }, void 0, false, {
                                                 fileName: "[project]/components/panels/facturas-panel.tsx",
-                                                lineNumber: 304,
+                                                lineNumber: 330,
                                                 columnNumber: 37
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
@@ -4939,7 +5131,7 @@ function FacturasPanel({ setStatus }) {
                                                 children: "Forma Pago"
                                             }, void 0, false, {
                                                 fileName: "[project]/components/panels/facturas-panel.tsx",
-                                                lineNumber: 305,
+                                                lineNumber: 331,
                                                 columnNumber: 37
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
@@ -4947,7 +5139,7 @@ function FacturasPanel({ setStatus }) {
                                                 children: "Estado"
                                             }, void 0, false, {
                                                 fileName: "[project]/components/panels/facturas-panel.tsx",
-                                                lineNumber: 306,
+                                                lineNumber: 332,
                                                 columnNumber: 37
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
@@ -4955,18 +5147,18 @@ function FacturasPanel({ setStatus }) {
                                                 children: "Acción"
                                             }, void 0, false, {
                                                 fileName: "[project]/components/panels/facturas-panel.tsx",
-                                                lineNumber: 307,
+                                                lineNumber: 333,
                                                 columnNumber: 37
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/components/panels/facturas-panel.tsx",
-                                        lineNumber: 298,
+                                        lineNumber: 324,
                                         columnNumber: 33
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/components/panels/facturas-panel.tsx",
-                                    lineNumber: 297,
+                                    lineNumber: 323,
                                     columnNumber: 29
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("tbody", {
@@ -4979,7 +5171,7 @@ function FacturasPanel({ setStatus }) {
                                                     children: factura.idFactura
                                                 }, void 0, false, {
                                                     fileName: "[project]/components/panels/facturas-panel.tsx",
-                                                    lineNumber: 317,
+                                                    lineNumber: 343,
                                                     columnNumber: 41
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -4987,7 +5179,7 @@ function FacturasPanel({ setStatus }) {
                                                     children: factura.numeroFactura
                                                 }, void 0, false, {
                                                     fileName: "[project]/components/panels/facturas-panel.tsx",
-                                                    lineNumber: 318,
+                                                    lineNumber: 344,
                                                     columnNumber: 41
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -4995,7 +5187,7 @@ function FacturasPanel({ setStatus }) {
                                                     children: factura.nombreCliente
                                                 }, void 0, false, {
                                                     fileName: "[project]/components/panels/facturas-panel.tsx",
-                                                    lineNumber: 319,
+                                                    lineNumber: 345,
                                                     columnNumber: 41
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -5003,7 +5195,7 @@ function FacturasPanel({ setStatus }) {
                                                     children: factura.cedulaCliente
                                                 }, void 0, false, {
                                                     fileName: "[project]/components/panels/facturas-panel.tsx",
-                                                    lineNumber: 320,
+                                                    lineNumber: 346,
                                                     columnNumber: 41
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -5011,7 +5203,7 @@ function FacturasPanel({ setStatus }) {
                                                     children: formatearFecha(factura.fechaFactura)
                                                 }, void 0, false, {
                                                     fileName: "[project]/components/panels/facturas-panel.tsx",
-                                                    lineNumber: 321,
+                                                    lineNumber: 347,
                                                     columnNumber: 41
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -5025,7 +5217,7 @@ function FacturasPanel({ setStatus }) {
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/components/panels/facturas-panel.tsx",
-                                                    lineNumber: 322,
+                                                    lineNumber: 348,
                                                     columnNumber: 41
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -5033,7 +5225,7 @@ function FacturasPanel({ setStatus }) {
                                                     children: obtenerTextoFormaPago(factura.formaPago)
                                                 }, void 0, false, {
                                                     fileName: "[project]/components/panels/facturas-panel.tsx",
-                                                    lineNumber: 325,
+                                                    lineNumber: 351,
                                                     columnNumber: 41
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -5044,7 +5236,7 @@ function FacturasPanel({ setStatus }) {
                                                     children: obtenerTextoEstado(factura.estado)
                                                 }, void 0, false, {
                                                     fileName: "[project]/components/panels/facturas-panel.tsx",
-                                                    lineNumber: 328,
+                                                    lineNumber: 354,
                                                     columnNumber: 41
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -5058,40 +5250,40 @@ function FacturasPanel({ setStatus }) {
                                                         children: "👁️ Ver"
                                                     }, void 0, false, {
                                                         fileName: "[project]/components/panels/facturas-panel.tsx",
-                                                        lineNumber: 332,
+                                                        lineNumber: 358,
                                                         columnNumber: 45
                                                     }, this)
                                                 }, void 0, false, {
                                                     fileName: "[project]/components/panels/facturas-panel.tsx",
-                                                    lineNumber: 331,
+                                                    lineNumber: 357,
                                                     columnNumber: 41
                                                 }, this)
                                             ]
                                         }, factura.idFactura, true, {
                                             fileName: "[project]/components/panels/facturas-panel.tsx",
-                                            lineNumber: 312,
+                                            lineNumber: 338,
                                             columnNumber: 37
                                         }, this))
                                 }, void 0, false, {
                                     fileName: "[project]/components/panels/facturas-panel.tsx",
-                                    lineNumber: 310,
+                                    lineNumber: 336,
                                     columnNumber: 29
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/components/panels/facturas-panel.tsx",
-                            lineNumber: 296,
+                            lineNumber: 322,
                             columnNumber: 25
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/components/panels/facturas-panel.tsx",
-                        lineNumber: 295,
+                        lineNumber: 321,
                         columnNumber: 21
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/components/panels/facturas-panel.tsx",
-                lineNumber: 266,
+                lineNumber: 292,
                 columnNumber: 13
             }, this),
             mostrarDetalle && facturaSeleccionada && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -5117,7 +5309,7 @@ function FacturasPanel({ setStatus }) {
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/components/panels/facturas-panel.tsx",
-                                            lineNumber: 363,
+                                            lineNumber: 389,
                                             columnNumber: 33
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -5128,13 +5320,13 @@ function FacturasPanel({ setStatus }) {
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/components/panels/facturas-panel.tsx",
-                                            lineNumber: 366,
+                                            lineNumber: 392,
                                             columnNumber: 33
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/components/panels/facturas-panel.tsx",
-                                    lineNumber: 362,
+                                    lineNumber: 388,
                                     columnNumber: 29
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -5143,13 +5335,13 @@ function FacturasPanel({ setStatus }) {
                                     children: "✕"
                                 }, void 0, false, {
                                     fileName: "[project]/components/panels/facturas-panel.tsx",
-                                    lineNumber: 370,
+                                    lineNumber: 396,
                                     columnNumber: 29
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/components/panels/facturas-panel.tsx",
-                            lineNumber: 361,
+                            lineNumber: 387,
                             columnNumber: 25
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -5165,7 +5357,7 @@ function FacturasPanel({ setStatus }) {
                                             children: "👤 Información del Cliente"
                                         }, void 0, false, {
                                             fileName: "[project]/components/panels/facturas-panel.tsx",
-                                            lineNumber: 381,
+                                            lineNumber: 407,
                                             columnNumber: 33
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -5178,7 +5370,7 @@ function FacturasPanel({ setStatus }) {
                                                             children: "Nombre:"
                                                         }, void 0, false, {
                                                             fileName: "[project]/components/panels/facturas-panel.tsx",
-                                                            lineNumber: 383,
+                                                            lineNumber: 409,
                                                             columnNumber: 40
                                                         }, this),
                                                         " ",
@@ -5186,7 +5378,7 @@ function FacturasPanel({ setStatus }) {
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/components/panels/facturas-panel.tsx",
-                                                    lineNumber: 383,
+                                                    lineNumber: 409,
                                                     columnNumber: 37
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -5196,7 +5388,7 @@ function FacturasPanel({ setStatus }) {
                                                             children: "Cédula:"
                                                         }, void 0, false, {
                                                             fileName: "[project]/components/panels/facturas-panel.tsx",
-                                                            lineNumber: 384,
+                                                            lineNumber: 410,
                                                             columnNumber: 40
                                                         }, this),
                                                         " ",
@@ -5204,19 +5396,19 @@ function FacturasPanel({ setStatus }) {
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/components/panels/facturas-panel.tsx",
-                                                    lineNumber: 384,
+                                                    lineNumber: 410,
                                                     columnNumber: 37
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/components/panels/facturas-panel.tsx",
-                                            lineNumber: 382,
+                                            lineNumber: 408,
                                             columnNumber: 33
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/components/panels/facturas-panel.tsx",
-                                    lineNumber: 380,
+                                    lineNumber: 406,
                                     columnNumber: 29
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -5229,7 +5421,7 @@ function FacturasPanel({ setStatus }) {
                                             children: "💳 Información de Pago"
                                         }, void 0, false, {
                                             fileName: "[project]/components/panels/facturas-panel.tsx",
-                                            lineNumber: 389,
+                                            lineNumber: 415,
                                             columnNumber: 33
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -5242,7 +5434,7 @@ function FacturasPanel({ setStatus }) {
                                                             children: "Forma de Pago:"
                                                         }, void 0, false, {
                                                             fileName: "[project]/components/panels/facturas-panel.tsx",
-                                                            lineNumber: 391,
+                                                            lineNumber: 417,
                                                             columnNumber: 40
                                                         }, this),
                                                         " ",
@@ -5250,7 +5442,7 @@ function FacturasPanel({ setStatus }) {
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/components/panels/facturas-panel.tsx",
-                                                    lineNumber: 391,
+                                                    lineNumber: 417,
                                                     columnNumber: 37
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -5260,7 +5452,7 @@ function FacturasPanel({ setStatus }) {
                                                             children: "Estado:"
                                                         }, void 0, false, {
                                                             fileName: "[project]/components/panels/facturas-panel.tsx",
-                                                            lineNumber: 392,
+                                                            lineNumber: 418,
                                                             columnNumber: 40
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -5270,13 +5462,13 @@ function FacturasPanel({ setStatus }) {
                                                             children: obtenerTextoEstado(facturaSeleccionada.estado)
                                                         }, void 0, false, {
                                                             fileName: "[project]/components/panels/facturas-panel.tsx",
-                                                            lineNumber: 393,
+                                                            lineNumber: 419,
                                                             columnNumber: 41
                                                         }, this)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/components/panels/facturas-panel.tsx",
-                                                    lineNumber: 392,
+                                                    lineNumber: 418,
                                                     columnNumber: 37
                                                 }, this),
                                                 facturaSeleccionada.formaPago === 'CREDITO_DIRECTO' && facturaSeleccionada.numeroCuotas && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Fragment"], {
@@ -5288,7 +5480,7 @@ function FacturasPanel({ setStatus }) {
                                                                     children: "ID Crédito:"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/components/panels/facturas-panel.tsx",
-                                                                    lineNumber: 399,
+                                                                    lineNumber: 425,
                                                                     columnNumber: 48
                                                                 }, this),
                                                                 " #",
@@ -5296,7 +5488,7 @@ function FacturasPanel({ setStatus }) {
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/components/panels/facturas-panel.tsx",
-                                                            lineNumber: 399,
+                                                            lineNumber: 425,
                                                             columnNumber: 45
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -5306,7 +5498,7 @@ function FacturasPanel({ setStatus }) {
                                                                     children: "Cuotas:"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/components/panels/facturas-panel.tsx",
-                                                                    lineNumber: 400,
+                                                                    lineNumber: 426,
                                                                     columnNumber: 48
                                                                 }, this),
                                                                 " ",
@@ -5316,7 +5508,7 @@ function FacturasPanel({ setStatus }) {
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/components/panels/facturas-panel.tsx",
-                                                            lineNumber: 400,
+                                                            lineNumber: 426,
                                                             columnNumber: 45
                                                         }, this)
                                                     ]
@@ -5324,19 +5516,19 @@ function FacturasPanel({ setStatus }) {
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/components/panels/facturas-panel.tsx",
-                                            lineNumber: 390,
+                                            lineNumber: 416,
                                             columnNumber: 33
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/components/panels/facturas-panel.tsx",
-                                    lineNumber: 388,
+                                    lineNumber: 414,
                                     columnNumber: 29
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/components/panels/facturas-panel.tsx",
-                            lineNumber: 379,
+                            lineNumber: 405,
                             columnNumber: 25
                         }, this),
                         facturaSeleccionada.items && facturaSeleccionada.items.length > 0 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -5350,7 +5542,7 @@ function FacturasPanel({ setStatus }) {
                                     children: "🛒 Productos"
                                 }, void 0, false, {
                                     fileName: "[project]/components/panels/facturas-panel.tsx",
-                                    lineNumber: 410,
+                                    lineNumber: 436,
                                     columnNumber: 33
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -5369,7 +5561,7 @@ function FacturasPanel({ setStatus }) {
                                                             children: "Producto"
                                                         }, void 0, false, {
                                                             fileName: "[project]/components/panels/facturas-panel.tsx",
-                                                            lineNumber: 415,
+                                                            lineNumber: 441,
                                                             columnNumber: 49
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
@@ -5377,7 +5569,7 @@ function FacturasPanel({ setStatus }) {
                                                             children: "Marca"
                                                         }, void 0, false, {
                                                             fileName: "[project]/components/panels/facturas-panel.tsx",
-                                                            lineNumber: 416,
+                                                            lineNumber: 442,
                                                             columnNumber: 49
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
@@ -5385,7 +5577,7 @@ function FacturasPanel({ setStatus }) {
                                                             children: "Cantidad"
                                                         }, void 0, false, {
                                                             fileName: "[project]/components/panels/facturas-panel.tsx",
-                                                            lineNumber: 417,
+                                                            lineNumber: 443,
                                                             columnNumber: 49
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
@@ -5393,7 +5585,7 @@ function FacturasPanel({ setStatus }) {
                                                             children: "Precio Unit."
                                                         }, void 0, false, {
                                                             fileName: "[project]/components/panels/facturas-panel.tsx",
-                                                            lineNumber: 418,
+                                                            lineNumber: 444,
                                                             columnNumber: 49
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
@@ -5401,18 +5593,18 @@ function FacturasPanel({ setStatus }) {
                                                             children: "Subtotal"
                                                         }, void 0, false, {
                                                             fileName: "[project]/components/panels/facturas-panel.tsx",
-                                                            lineNumber: 419,
+                                                            lineNumber: 445,
                                                             columnNumber: 49
                                                         }, this)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/components/panels/facturas-panel.tsx",
-                                                    lineNumber: 414,
+                                                    lineNumber: 440,
                                                     columnNumber: 45
                                                 }, this)
                                             }, void 0, false, {
                                                 fileName: "[project]/components/panels/facturas-panel.tsx",
-                                                lineNumber: 413,
+                                                lineNumber: 439,
                                                 columnNumber: 41
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("tbody", {
@@ -5423,7 +5615,7 @@ function FacturasPanel({ setStatus }) {
                                                                 children: item.nombre
                                                             }, void 0, false, {
                                                                 fileName: "[project]/components/panels/facturas-panel.tsx",
-                                                                lineNumber: 425,
+                                                                lineNumber: 451,
                                                                 columnNumber: 53
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -5431,7 +5623,7 @@ function FacturasPanel({ setStatus }) {
                                                                 children: item.marca
                                                             }, void 0, false, {
                                                                 fileName: "[project]/components/panels/facturas-panel.tsx",
-                                                                lineNumber: 426,
+                                                                lineNumber: 452,
                                                                 columnNumber: 53
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -5439,7 +5631,7 @@ function FacturasPanel({ setStatus }) {
                                                                 children: item.cantidad
                                                             }, void 0, false, {
                                                                 fileName: "[project]/components/panels/facturas-panel.tsx",
-                                                                lineNumber: 427,
+                                                                lineNumber: 453,
                                                                 columnNumber: 53
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -5450,7 +5642,7 @@ function FacturasPanel({ setStatus }) {
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/components/panels/facturas-panel.tsx",
-                                                                lineNumber: 428,
+                                                                lineNumber: 454,
                                                                 columnNumber: 53
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -5461,35 +5653,35 @@ function FacturasPanel({ setStatus }) {
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/components/panels/facturas-panel.tsx",
-                                                                lineNumber: 429,
+                                                                lineNumber: 455,
                                                                 columnNumber: 53
                                                             }, this)
                                                         ]
                                                     }, idx, true, {
                                                         fileName: "[project]/components/panels/facturas-panel.tsx",
-                                                        lineNumber: 424,
+                                                        lineNumber: 450,
                                                         columnNumber: 49
                                                     }, this))
                                             }, void 0, false, {
                                                 fileName: "[project]/components/panels/facturas-panel.tsx",
-                                                lineNumber: 422,
+                                                lineNumber: 448,
                                                 columnNumber: 41
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/components/panels/facturas-panel.tsx",
-                                        lineNumber: 412,
+                                        lineNumber: 438,
                                         columnNumber: 37
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/components/panels/facturas-panel.tsx",
-                                    lineNumber: 411,
+                                    lineNumber: 437,
                                     columnNumber: 33
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/components/panels/facturas-panel.tsx",
-                            lineNumber: 409,
+                            lineNumber: 435,
                             columnNumber: 29
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -5507,7 +5699,7 @@ function FacturasPanel({ setStatus }) {
                                                     children: "Subtotal:"
                                                 }, void 0, false, {
                                                     fileName: "[project]/components/panels/facturas-panel.tsx",
-                                                    lineNumber: 442,
+                                                    lineNumber: 468,
                                                     columnNumber: 60
                                                 }, this),
                                                 " $",
@@ -5515,7 +5707,7 @@ function FacturasPanel({ setStatus }) {
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/components/panels/facturas-panel.tsx",
-                                            lineNumber: 442,
+                                            lineNumber: 468,
                                             columnNumber: 37
                                         }, this),
                                         facturaSeleccionada.descuento > 0 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -5529,7 +5721,7 @@ function FacturasPanel({ setStatus }) {
                                                     children: "Descuento:"
                                                 }, void 0, false, {
                                                     fileName: "[project]/components/panels/facturas-panel.tsx",
-                                                    lineNumber: 445,
+                                                    lineNumber: 471,
                                                     columnNumber: 45
                                                 }, this),
                                                 " -$",
@@ -5537,7 +5729,7 @@ function FacturasPanel({ setStatus }) {
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/components/panels/facturas-panel.tsx",
-                                            lineNumber: 444,
+                                            lineNumber: 470,
                                             columnNumber: 41
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -5551,23 +5743,23 @@ function FacturasPanel({ setStatus }) {
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/components/panels/facturas-panel.tsx",
-                                            lineNumber: 448,
+                                            lineNumber: 474,
                                             columnNumber: 37
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/components/panels/facturas-panel.tsx",
-                                    lineNumber: 441,
+                                    lineNumber: 467,
                                     columnNumber: 33
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/components/panels/facturas-panel.tsx",
-                                lineNumber: 440,
+                                lineNumber: 466,
                                 columnNumber: 29
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/components/panels/facturas-panel.tsx",
-                            lineNumber: 439,
+                            lineNumber: 465,
                             columnNumber: 25
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -5586,7 +5778,7 @@ function FacturasPanel({ setStatus }) {
                                     children: "📊 Ver Tabla de Amortización"
                                 }, void 0, false, {
                                     fileName: "[project]/components/panels/facturas-panel.tsx",
-                                    lineNumber: 458,
+                                    lineNumber: 484,
                                     columnNumber: 33
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
@@ -5598,30 +5790,30 @@ function FacturasPanel({ setStatus }) {
                                     children: "Cerrar"
                                 }, void 0, false, {
                                     fileName: "[project]/components/panels/facturas-panel.tsx",
-                                    lineNumber: 469,
+                                    lineNumber: 495,
                                     columnNumber: 29
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/components/panels/facturas-panel.tsx",
-                            lineNumber: 456,
+                            lineNumber: 482,
                             columnNumber: 25
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/components/panels/facturas-panel.tsx",
-                    lineNumber: 356,
+                    lineNumber: 382,
                     columnNumber: 21
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/components/panels/facturas-panel.tsx",
-                lineNumber: 352,
+                lineNumber: 378,
                 columnNumber: 17
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/components/panels/facturas-panel.tsx",
-        lineNumber: 183,
+        lineNumber: 209,
         columnNumber: 9
     }, this);
 }
@@ -5865,4 +6057,4 @@ if (typeof globalThis.$RefreshHelpers$ === 'object' && globalThis.$RefreshHelper
 }),
 ]);
 
-//# sourceMappingURL=_729ea0a0._.js.map
+//# sourceMappingURL=_5966c513._.js.map

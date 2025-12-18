@@ -5,7 +5,8 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { useEffect } from 'react'
 import { getPanelContext } from '@/hooks/use-panel-navigation'
-
+import { clienteUnificado } from '@/lib/api-client'
+import { toastContext } from '@/components/ui/toast-notification'
 
 interface CreditoPanelProps {
   setStatus: (status: { text: string; type: string }) => void
@@ -21,27 +22,31 @@ export default function CreditoPanel({ setStatus, creditoIdToLoad, onCreditoLoad
   const [infoCredito, setInfoCredito] = useState('')
   const panelContext = getPanelContext()
 
-
   const cargarTablaAutomaticamente = async (idCredito: number) => {
     setCedulaAmortizacion(String(idCredito))
     setStatus({ text: 'Cargando tabla de amortización automáticamente...', type: 'loading' })
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 500))
+      const result = await clienteUnificado.obtenerTablaAmortizacion(idCredito)
 
-      const cuotas = Array.from({ length: 12 }, (_, i) => ({
-        numero: i + 1,
-        valor: 125.50,
-        interes: 15.50,
-        capital: 110.00,
-        saldo: 1500 - (110 * (i + 1)),
-        vencimiento: new Date(Date.now() + (i + 1) * 30 * 24 * 60 * 60 * 1000).toLocaleDateString('es-ES'),
-      }))
+      if (result?.encontrado) {
+        const cuotasFormateadas = result.cuotas.map((cuota: any) => ({
+          numero: cuota.numeroCuota,           
+          valor: cuota.valorCuota,              
+          interes: cuota.interesPagado,        
+          capital: cuota.capitalPagado,        
+          saldo: cuota.saldo,                   
+          vencimiento: cuota.fechaVencimiento   
+        }))
 
-      setTablaAmortizacion(cuotas)
-      setInfoCredito(`Crédito #${idCredito} - Monto: $1,500.00 - Tasa: 12.5% - Cuotas: 12`)
-      setStatus({ text: `Tabla de amortización cargada para crédito #${idCredito}`, type: 'success' })
-
+        setTablaAmortizacion(cuotasFormateadas)
+        setInfoCredito(`Crédito #${result.idCredito} - Monto: $${result.montoCredito} - Tasa: ${(result.tasaInteres * 100).toFixed(1)}% - Cuotas: ${result.numeroCuotas}`)
+        setStatus({ text: `Tabla de amortización cargada para crédito #${idCredito}`, type: 'success' })
+      } else {
+        setTablaAmortizacion([])
+        setInfoCredito('')
+        setStatus({ text: result?.mensaje || 'Tabla no encontrada', type: 'error' })
+      }
       // Notificar que se terminó de cargar
       if (onCreditoLoaded) {
         onCreditoLoaded()
@@ -119,25 +124,43 @@ Mensaje: Monto máximo calculado correctamente
       return
     }
 
+    const idCredito = parseInt(cedulaAmortizacion.trim())
+    if (isNaN(idCredito)) {
+      toastContext.showWarning('ID Inválido ⚠️', 'Ingrese un ID de crédito válido')
+      setStatus({ text: 'ID de crédito inválido', type: 'warning' })
+      return
+    }
+
     setStatus({ text: 'Obteniendo tabla de amortización...', type: 'loading' })
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 800))
+      const result = await clienteUnificado.obtenerTablaAmortizacion(idCredito)
 
-      const cuotas = Array.from({ length: 12 }, (_, i) => ({
-        numero: i + 1,
-        valor: 125.50,
-        interes: 15.50,
-        capital: 110.00,
-        saldo: 1500 - (110 * (i + 1)),
-        vencimiento: new Date(Date.now() + (i + 1) * 30 * 24 * 60 * 60 * 1000).toLocaleDateString('es-ES'),
-      }))
+      if (result?.encontrado) {
+        const cuotasFormateadas = result.cuotas.map((cuota: any) => ({
+          numero: cuota.numeroCuota,           
+          valor: cuota.valorCuota,              
+          interes: cuota.interesPagado,        
+          capital: cuota.capitalPagado,        
+          saldo: cuota.saldo,                   
+          vencimiento: cuota.fechaVencimiento   
+        }))
 
-      setTablaAmortizacion(cuotas)
-      setInfoCredito(`Crédito #${cedulaAmortizacion} - Monto: $1,500.00 - Tasa: 12.5% - Cuotas: 12`)
-      setStatus({ text: 'Tabla de amortización cargada', type: 'success' })
+        setTablaAmortizacion(cuotasFormateadas)
+        setInfoCredito(`Crédito #${result.idCredito} - Monto: $${result.montoCredito} - Tasa: ${(result.tasaInteres * 100).toFixed(1)}% - Cuotas: ${result.numeroCuotas}`)
+        setStatus({ text: 'Tabla de amortización cargada exitosamente', type: 'success' })
+        toastContext.showSuccess('Tabla Cargada ✅', `Tabla de amortización para crédito #${idCredito}`)
+      } else {
+        setTablaAmortizacion([])
+        setInfoCredito('')
+        setStatus({ text: result?.mensaje || 'Tabla no encontrada', type: 'error' })
+        toastContext.showError('Tabla No Encontrada ❌', result?.mensaje || 'No se encontró la tabla de amortización')
+      }
     } catch (error) {
+      setTablaAmortizacion([])
+      setInfoCredito('')
       setStatus({ text: 'Error al obtener tabla', type: 'error' })
+      toastContext.showError('Error de Conexión ❌', 'No se pudo obtener la tabla de amortización')
     }
   }
 

@@ -49,14 +49,14 @@ export default function FacturasPanel({ setStatus }: FacturasPanelProps) {
     const [cargando, setCargando] = useState(false)
 
     useEffect(() => {
-        cargarFacturas()
+        cargarFacturas(false)
     }, [])
 
     useEffect(() => {
         aplicarFiltros()
     }, [filtros, facturas])
 
-    const cargarFacturas = async () => {
+    const cargarFacturas = async (mostrarToast = false) => {
         setCargando(true)
         setStatus({ text: 'Cargando facturas...', type: 'loading' })
 
@@ -65,41 +65,15 @@ export default function FacturasPanel({ setStatus }: FacturasPanelProps) {
             if (result && Array.isArray(result)) {
                 setFacturas(result)
                 setStatus({ text: `Facturas cargadas: ${result.length}`, type: 'success' })
-                toastContext.showSuccess('Facturas Cargadas ✅', `Se cargaron ${result.length} facturas correctamente`)
+                if (mostrarToast) {
+                    toastContext.showSuccess('Facturas Cargadas ✅', `Se cargaron ${result.length} facturas correctamente`)
+                }
             } else {
-                // Datos simulados para fallback
-                const facturasSim = [
-                    {
-                        idFactura: 1,
-                        numeroFactura: 'FAC-000001',
-                        cedulaCliente: '1234567890',
-                        nombreCliente: 'Juan Pérez',
-                        fechaFactura: '2024-11-19 10:30:00',
-                        subtotal: 1200,
-                        descuento: 396,
-                        total: 804,
-                        formaPago: 'EFECTIVO',
-                        estado: 'PAGADA'
-                    },
-                    {
-                        idFactura: 2,
-                        numeroFactura: 'FAC-000002',
-                        cedulaCliente: '0987654321',
-                        nombreCliente: 'María González',
-                        fechaFactura: '2024-11-19 11:15:00',
-                        subtotal: 850,
-                        descuento: 0,
-                        total: 850,
-                        formaPago: 'CREDITO_DIRECTO',
-                        estado: 'PAGADA',
-                        numeroCuotas: 12,
-                        cuotaMensual: 75.50,
-                        idCreditoBanco: 1
-                    }
-                ]
-                setFacturas(facturasSim)
-                setStatus({ text: 'Datos simulados (servidor no disponible)', type: 'warning' })
-                toastContext.showWarning('Modo Simulación ⚠️', 'Mostrando datos de ejemplo')
+                setFacturas([])
+                setStatus({ text: 'No se encontraron facturas', type: 'warning' })
+                if (mostrarToast) {
+                    toastContext.showWarning('Sin Facturas ⚠️', 'No se encontraron facturas registradas')
+                }
             }
         } catch (error) {
             setStatus({ text: 'Error al cargar facturas', type: 'error' })
@@ -216,7 +190,7 @@ export default function FacturasPanel({ setStatus }: FacturasPanelProps) {
                     <h3 className="font-bold text-lg" style={{ color: 'var(--dark-gray)' }}>🔍 Filtros de Búsqueda</h3>
                     <div className="space-x-2">
                         <Button
-                            onClick={cargarFacturas}
+                            onClick={() => cargarFacturas(true)}
                             disabled={cargando}
                             style={{ backgroundColor: 'var(--primary)', color: 'white' }}
                         >

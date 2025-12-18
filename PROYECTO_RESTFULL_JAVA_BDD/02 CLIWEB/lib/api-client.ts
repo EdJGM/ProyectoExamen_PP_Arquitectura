@@ -1,5 +1,5 @@
-const BASE_COMERCIALIZADORA = "http://10.40.33.61:8080/ComercializadoraElectrodomesticos/api";
-const BASE_BANQUITO = "http://10.40.33.61:8080/BanquitoCore/api/credito";
+const BASE_COMERCIALIZADORA = "http://localhost:8080/ComercializadoraElectrodomesticos/api";
+const BASE_BANQUITO = "http://localhost:8080/BanquitoCore/api/credito";
 
 export type TipoProtocolo = "REST" | "SOAP";
 
